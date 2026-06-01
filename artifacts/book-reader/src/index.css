@@ -237,33 +237,43 @@
   }
 }
 
-/* Book reader specific styles */
+/* ─── Book content typography ───────────────────────────────────────────── */
 .book-content p {
   font-family: var(--app-font-serif);
-  line-height: 1.85;
+  line-height: 1.875;
   font-size: 1.05rem;
   color: hsl(var(--foreground));
-  margin-bottom: 1.4em;
+  margin-bottom: 0;
   text-align: justify;
   hyphens: auto;
-}
-
-.book-content p:first-child {
-  text-indent: 0;
+  -webkit-hyphens: auto;
+  hanging-punctuation: first last;
 }
 
 .book-content p + p {
-  text-indent: 1.5em;
-  margin-top: 0;
+  text-indent: 1.6em;
+  margin-top: 0.2em;
+}
+
+.section-block + .section-block {
+  margin-top: 0.5em;
 }
 
 .book-content blockquote {
   font-family: var(--app-font-serif);
-  border-left: 3px solid hsl(var(--primary) / 0.4);
-  padding-left: 1.5rem;
-  margin: 1.75rem 0;
-  color: hsl(var(--muted-foreground));
+  border-left: 3px solid hsl(var(--primary) / 0.35);
+  padding: 0.2rem 0 0.2rem 1.5rem;
+  margin: 2rem 0 2rem 0.5rem;
+  color: hsl(var(--foreground) / 0.70);
   font-style: italic;
+  font-size: 1.02rem;
+  line-height: 1.8;
+}
+
+.book-content blockquote p {
+  text-indent: 0 !important;
+  text-align: left;
+  margin-bottom: 0.5em;
 }
 
 .book-content em {
@@ -275,21 +285,52 @@
   color: hsl(var(--foreground));
 }
 
+/* Footnotes */
 .footnote-inline {
   display: none;
 }
 
 .footnote-marker {
   color: hsl(var(--primary));
-  font-size: 0.75em;
+  font-size: 0.72em;
+  vertical-align: super;
+  line-height: 0;
   cursor: help;
 }
 
+/* Small caps */
 .sc {
   font-variant: small-caps;
+  letter-spacing: 0.03em;
 }
 
-/* TOC active link */
+/* ─── Search modal highlights ────────────────────────────────────────────── */
+mark {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+/* ─── Focus-visible ring ─────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Only show focus ring for keyboard navigation — remove the default outline */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ─── Smooth scroll (respect prefers-reduced-motion) ──────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ─── TOC active link ─────────────────────────────────────────────────────── */
 .toc-link-active {
   color: hsl(var(--sidebar-primary));
   font-weight: 500;

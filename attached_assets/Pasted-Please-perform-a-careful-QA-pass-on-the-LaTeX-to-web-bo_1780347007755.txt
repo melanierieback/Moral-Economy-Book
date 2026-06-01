@@ -1,0 +1,71 @@
+Please perform a careful QA pass on the LaTeX-to-web book reader.
+
+Important:
+The book content must be preserved.  Please do not rewrite, summarize, or stylistically edit the book.  This QA pass should focus on parsing accuracy, navigation, rendering, and deployment readiness.
+
+Please check the following:
+
+1. Content structure audit
+
+* Confirm that the parser detects:
+
+  * Prologue
+  * Chapters 1-17
+  * Conclusion
+  * all major `\section{...}` headings
+  * any `\subsection{...}` headings
+* Print or display a generated table of contents count so I can compare it against the LaTeX source.
+* Check that no chapter is missing.
+* Check that the Conclusion is included.
+
+2. Parsing preservation audit
+
+* Look for common LaTeX artifacts that are still visibly broken in the rendered page.
+* Check italics, bold text, escaped characters, quotation marks, dashes, footnotes, and citations.
+* Degrade gracefully where full LaTeX rendering is not supported.
+* Do not crash on unknown LaTeX commands.
+
+3. Navigation audit
+
+* Confirm all TOC links work.
+* Confirm active section highlighting works.
+* Confirm previous/next chapter navigation works.
+* Confirm direct anchor links work after page reload.
+* Confirm search result links work.
+
+4. Mobile audit
+
+* Confirm the mobile TOC drawer opens and closes correctly.
+* Confirm the reading column is comfortable on a phone.
+* Confirm the top nav does not cover anchored headings.
+
+5. Static deployment audit
+
+* Confirm the app builds successfully.
+* Confirm it can be deployed as a static site.
+* Confirm any base path can be configured for `/moral-economy` or `/book`.
+* Add a short README section explaining:
+
+  * how to run the parser
+  * how to run the dev server
+  * how to build the static site
+  * how to update the site when the LaTeX file changes
+
+6. Integration checklist
+   Please create a final checklist for adding this to the Non-Extractive Capital website:
+
+* recommended route
+* files/folders to copy
+* build command
+* static output folder
+* any base path configuration
+* where to place logo/branding assets
+* how to update the book later
+
+Acceptance criteria:
+
+* The app builds without errors.
+* The book contains Prologue, Chapters 1-17, and Conclusion.
+* Dynamic TOC and search work.
+* Mobile layout works.
+* README includes update/deployment instructions.

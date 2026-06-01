@@ -1,11 +1,22 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Menu, X, BookOpen, Sun, Moon } from "lucide-react";
+import { Menu, X, BookOpen, Sun, Moon, ArrowDown } from "lucide-react";
 import { book } from "../lib/book";
 import { TOC } from "../components/TOC";
 import { ChapterView } from "../components/ChapterView";
+import { Search } from "../components/Search";
 
-function useActiveSlug(allSlugs: string[]) {
-  const [activeSlug, setActiveSlug] = useState<string>(allSlugs[0] ?? "");
+// Build the flat list of all heading slugs for IntersectionObserver
+function buildAllSlugs() {
+  return book.chapters.flatMap((ch) => [
+    ch.slug,
+    ...ch.sections.filter((s) => s.title).map((s) => s.slug),
+  ]);
+}
+
+const ALL_SLUGS = buildAllSlugs();
+
+function useActiveSlug() {
+  const [activeSlug, setActiveSlug] = useState<string>(ALL_SLUGS[0] ?? "");
 
   useEffect(() => {
     const observers: IntersectionObserver[] = [];
@@ -32,10 +43,9 @@ function useActiveSlug(allSlugs: string[]) {
       if (best) setActiveSlug(best);
     };
 
-    for (const slug of allSlugs) {
+    for (const slug of ALL_SLUGS) {
       const el = document.getElementById(slug);
       if (!el) continue;
-
       const obs = new IntersectionObserver(
         (entries) => {
           for (const entry of entries) {
@@ -60,48 +70,104 @@ function useActiveSlug(allSlugs: string[]) {
     return () => {
       for (const obs of observers) obs.disconnect();
     };
-  }, [allSlugs]);
+  }, []);
 
   return activeSlug;
 }
 
+// Compute scroll progress (0–1) within the active chapter for the TOC progress bar
+function useScrollProgress() {
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    const onScroll = () => {
+      const total = document.documentElement.scrollHeight - window.innerHeight;
+      setProgress(total > 0 ? window.scrollY / total : 0);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return progress;
+}
+
 export function Reader() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const [darkMode, setDarkMode] = useState(() => {
+    try {
+      return localStorage.getItem("dark-mode") === "true";
+    } catch {
+      return false;
+    }
+  });
 
-  const allSlugs = book.chapters.flatMap((ch) => [
-    ch.slug,
-    ...ch.sections.filter((s) => s.title).map((s) => s.slug),
-  ]);
+  const activeSlug = useActiveSlug();
+  const scrollProgress = useScrollProgress();
 
-  const activeSlug = useActiveSlug(allSlugs);
-
+  // Persist dark mode
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add("dark");
+      localStorage.setItem("dark-mode", "true");
     } else {
       document.documentElement.classList.remove("dark");
+      localStorage.setItem("dark-mode", "false");
     }
   }, [darkMode]);
 
+  // Lock body scroll when mobile drawer is open
   useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
 
-  const scrollToChapter = useCallback((slug: string) => {
+  // Hash routing: on mount, scroll to the hash target
+  const didInitialScroll = useRef(false);
+  useEffect(() => {
+    if (didInitialScroll.current) return;
+    didInitialScroll.current = true;
+    const hash = window.location.hash.slice(1);
+    if (!hash) return;
+    // Wait for layout
+    const attempt = (tries: number) => {
+      const el = document.getElementById(hash);
+      if (el) {
+        el.scrollIntoView({ behavior: "instant", block: "start" });
+      } else if (tries > 0) {
+        setTimeout(() => attempt(tries - 1), 150);
+      }
+    };
+    setTimeout(() => attempt(5), 100);
+  }, []);
+
+  // Update URL hash on active slug change (debounced, replaceState only)
+  useEffect(() => {
+    if (!activeSlug) return;
+    const id = setTimeout(() => {
+      history.replaceState(null, "", `#${activeSlug}`);
+    }, 200);
+    return () => clearTimeout(id);
+  }, [activeSlug]);
+
+  const scrollToSlug = useCallback((slug: string) => {
     const el = document.getElementById(slug);
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
+      history.replaceState(null, "", `#${slug}`);
     }
   }, []);
+
+  const startReading = () => {
+    const firstSlug = book.chapters[0]?.slug;
+    if (firstSlug) scrollToSlug(firstSlug);
+  };
+
+  // Active chapter index for the TOC progress bar denominator
+  const activeChapterIndex = book.chapters.findIndex(
+    (ch) => ch.slug === activeSlug || ch.sections.some((s) => s.slug === activeSlug)
+  );
+  // Normalise progress to 0–1 within current chapter count
+  const tocProgress = book.chapters.length > 0
+    ? (activeChapterIndex + scrollProgress) / book.chapters.length
+    : 0;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -109,9 +175,10 @@ export function Reader() {
       <header className="lg:hidden sticky top-0 z-40 bg-sidebar border-b border-sidebar-border flex items-center px-4 h-14 gap-3 shadow-sm">
         <button
           onClick={() => setMobileOpen(true)}
-          className="text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors p-1"
+          className="text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors p-1 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-sidebar-primary focus-visible:outline-offset-1"
           data-testid="button-open-toc"
           aria-label="Open table of contents"
+          aria-expanded={mobileOpen}
         >
           <Menu size={20} />
         </button>
@@ -123,9 +190,9 @@ export function Reader() {
         </div>
         <button
           onClick={() => setDarkMode(!darkMode)}
-          className="text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors p-1"
+          className="text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors p-1 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-sidebar-primary focus-visible:outline-offset-1"
           data-testid="button-toggle-dark-mobile"
-          aria-label="Toggle dark mode"
+          aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
         >
           {darkMode ? <Sun size={16} /> : <Moon size={16} />}
         </button>
@@ -133,7 +200,7 @@ export function Reader() {
 
       {/* Mobile TOC drawer */}
       {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 flex">
+        <div className="lg:hidden fixed inset-0 z-50 flex" role="dialog" aria-modal="true" aria-label="Table of contents">
           <div
             className="fixed inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setMobileOpen(false)}
@@ -146,14 +213,19 @@ export function Reader() {
               </div>
               <button
                 onClick={() => setMobileOpen(false)}
-                className="text-sidebar-foreground/60 hover:text-sidebar-foreground transition-colors"
+                className="text-sidebar-foreground/60 hover:text-sidebar-foreground transition-colors p-1 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-sidebar-primary"
                 data-testid="button-close-toc"
+                aria-label="Close table of contents"
               >
                 <X size={18} />
               </button>
             </div>
             <div className="flex-1 overflow-hidden">
-              <TOC activeSlug={activeSlug} onNavigate={() => setMobileOpen(false)} />
+              <TOC
+                activeSlug={activeSlug}
+                scrollProgress={tocProgress}
+                onNavigate={() => setMobileOpen(false)}
+              />
             </div>
           </div>
         </div>
@@ -161,83 +233,97 @@ export function Reader() {
 
       <div className="flex flex-1 relative">
         {/* Desktop sidebar */}
-        <aside className="hidden lg:flex flex-col fixed top-0 left-0 h-screen w-64 xl:w-72 bg-sidebar border-r border-sidebar-border z-30">
+        <aside
+          className="hidden lg:flex flex-col fixed top-0 left-0 h-screen w-64 xl:w-72 bg-sidebar border-r border-sidebar-border z-30"
+          aria-label="Site navigation"
+        >
           {/* Sidebar header */}
-          <div className="shrink-0 px-5 py-5 border-b border-sidebar-border">
-            <div className="flex items-center justify-between mb-2">
-              <BookOpen size={16} className="text-sidebar-primary" />
-              <button
-                onClick={() => setDarkMode(!darkMode)}
-                className="text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
-                data-testid="button-toggle-dark"
-                aria-label="Toggle dark mode"
-              >
-                {darkMode ? <Sun size={14} /> : <Moon size={14} />}
-              </button>
+          <div className="shrink-0 px-5 py-4 border-b border-sidebar-border">
+            <div className="flex items-center justify-between mb-2.5">
+              <BookOpen size={15} className="text-sidebar-primary" />
+              <div className="flex items-center gap-3">
+                <Search />
+                <button
+                  onClick={() => setDarkMode(!darkMode)}
+                  className="text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors p-0.5 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-sidebar-primary"
+                  data-testid="button-toggle-dark"
+                  aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+                >
+                  {darkMode ? <Sun size={14} /> : <Moon size={14} />}
+                </button>
+              </div>
             </div>
-            <h1 className="font-serif text-sm font-semibold text-sidebar-foreground leading-snug">
+            <h1 className="font-serif text-[0.82rem] font-semibold text-sidebar-foreground leading-snug">
               {book.title}
             </h1>
-            <p className="text-[11px] text-sidebar-foreground/40 font-sans mt-0.5 leading-tight">
+            <p className="text-[10.5px] text-sidebar-foreground/35 font-sans mt-0.5 leading-tight">
               {book.subtitle}
             </p>
           </div>
 
           {/* TOC */}
           <div className="flex-1 overflow-hidden">
-            <TOC activeSlug={activeSlug} />
+            <TOC activeSlug={activeSlug} scrollProgress={tocProgress} />
           </div>
 
           {/* Sidebar footer */}
           <div className="shrink-0 px-5 py-3 border-t border-sidebar-border">
-            <p className="text-[10px] text-sidebar-foreground/30 font-sans">
-              Working manuscript
-            </p>
+            <p className="text-[10px] text-sidebar-foreground/25 font-sans">Working manuscript</p>
           </div>
         </aside>
 
         {/* Main content */}
-        <main
-          ref={contentRef}
-          className="flex-1 lg:ml-64 xl:ml-72 min-h-screen"
-        >
+        <main className="flex-1 lg:ml-64 xl:ml-72 min-h-screen" id="main-content">
           {/* Hero / landing */}
-          <div className="bg-primary text-primary-foreground py-16 md:py-20 px-6 md:px-12 lg:px-16">
+          <div className="bg-primary text-primary-foreground py-16 md:py-22 px-6 md:px-12 lg:px-16">
             <div className="max-w-2xl mx-auto">
-              <p className="text-[11px] uppercase tracking-[0.25em] font-sans opacity-60 mb-4">
+              <p className="text-[11px] uppercase tracking-[0.25em] font-sans opacity-50 mb-5">
                 Working manuscript
               </p>
-              <h1 className="font-serif text-3xl md:text-5xl font-bold leading-tight mb-4">
+              <h1 className="font-serif text-3xl md:text-[2.8rem] font-bold leading-tight mb-4 tracking-tight">
                 {book.title}
               </h1>
-              <p className="font-serif text-lg md:text-xl opacity-70 italic leading-relaxed">
+              <p className="font-serif text-lg md:text-xl opacity-65 italic leading-relaxed">
                 {book.subtitle}
               </p>
-              <div className="mt-8 h-px bg-primary-foreground/20" />
-              <p className="mt-5 text-sm opacity-55 font-sans">
-                {book.chapters.length} chapters &middot; Use the table of contents to navigate
-              </p>
+              <div className="mt-8 h-px bg-primary-foreground/15" />
+              <div className="mt-6 flex items-center gap-5 flex-wrap">
+                <p className="text-[0.8rem] opacity-45 font-sans">
+                  {book.chapters.length} chapters
+                </p>
+                <button
+                  onClick={startReading}
+                  data-testid="button-start-reading"
+                  className="inline-flex items-center gap-2 text-[0.82rem] font-sans font-medium opacity-80 hover:opacity-100 transition-opacity border border-primary-foreground/25 hover:border-primary-foreground/50 rounded-full px-4 py-1.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-foreground"
+                >
+                  <ArrowDown size={13} />
+                  Start reading
+                </button>
+              </div>
             </div>
           </div>
 
           {/* Chapters */}
           <div className="px-6 md:px-12 lg:px-16 py-12 md:py-16 max-w-[820px]">
             {book.chapters.map((chapter, idx) => (
-              <div key={chapter.slug} className={idx > 0 ? "mt-20 md:mt-28 pt-8 border-t-2 border-border/30" : ""}>
+              <div
+                key={chapter.slug}
+                className={idx > 0 ? "mt-20 md:mt-28 pt-8 border-t-2 border-border/25" : ""}
+              >
                 <ChapterView
                   chapter={chapter}
                   chapterIndex={idx}
-                  onNavigateChapter={scrollToChapter}
+                  onNavigateChapter={scrollToSlug}
                 />
               </div>
             ))}
           </div>
 
           {/* Footer */}
-          <footer className="px-6 md:px-12 lg:px-16 py-10 border-t border-border mt-8">
+          <footer className="px-6 md:px-12 lg:px-16 py-10 border-t border-border mt-4">
             <div className="max-w-[820px]">
               <p className="text-xs text-muted-foreground font-sans">
-                <span className="font-serif italic">{book.title}</span> &mdash; {book.subtitle}.
+                <span className="font-serif italic">{book.title}</span> &mdash; {book.subtitle}.{" "}
                 Working manuscript.
               </p>
             </div>
