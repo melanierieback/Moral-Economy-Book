@@ -1,0 +1,62 @@
+The basic LaTeX-to-web reader is now working.  Please add reader-quality improvements while keeping the implementation simple and credit-efficient.
+
+Do not rewrite the book content.  Do not manually edit the generated book JSON unless absolutely necessary.  Improve the parser and frontend only.
+
+Please add the following features:
+
+1. Search
+
+* Add a search box that searches across chapter titles, section titles, subsection titles, and body text.
+* Results should show chapter/section title and a short snippet.
+* Clicking a result should navigate to the relevant section anchor.
+* Search can be client-side over `book.json`; no backend needed.
+
+2. Better TOC behavior
+
+* Chapters in the table of contents should be collapsible.
+* The current chapter should auto-expand.
+* The active section should remain highlighted.
+* Add a small reading progress indicator.
+
+3. Chapter navigation
+
+* Add previous/next chapter navigation at the bottom of each chapter.
+* Add a “Back to top” link.
+* Add a “Start reading” button on the book landing/header area that jumps to the Prologue.
+
+4. URL and routing
+
+* Make sure direct links to sections work when loading the page.
+* If using React Router, use hash-based routing or another static-hosting-friendly approach.
+* The app should be deployable as a static site and easy to place under `/moral-economy` or `/book` on the Non-Extractive Capital website.
+
+5. Typography polish
+
+* Improve readability for long-form text.
+* Use a comfortable line height.
+* Make block quotes, footnotes, and headings visually distinct.
+* Keep the style restrained, serious, and elegant.
+* Do not use flashy effects.
+
+6. Accessibility
+
+* Keyboard-accessible TOC drawer.
+* Clear focus states.
+* Good color contrast.
+* Semantic headings where possible.
+
+7. Performance
+
+* Avoid loading the entire book repeatedly.
+* Keep the JSON generation separate from the rendering.
+* Avoid unnecessary dependencies.
+* Ensure scrolling remains smooth even with a long book.
+
+Acceptance criteria:
+
+* Search works client-side.
+* Collapsible TOC works.
+* Direct section links work.
+* The app is mobile-friendly.
+* The site can be statically deployed.
+* The book content remains sourced from the LaTeX file via the parser.
