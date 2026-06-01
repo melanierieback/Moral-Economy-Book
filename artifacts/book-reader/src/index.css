@@ -67,6 +67,24 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+/* ─── NEC Design tokens ───────────────────────────────────────────────── */
+:root {
+  --nec-black: #03040c;
+  --nec-navy: #070b1c;
+  --nec-deep-navy: #0a1024;
+  --nec-purple: #4b22c8;
+  --nec-purple-glow: #7b4dff;
+  --nec-gold: #d6a93a;
+  --nec-gold-soft: #e2c568;
+  --nec-ivory: #f5efe2;
+  --nec-ivory-dark: #e4d6bf;
+  --nec-text-light: #f7f0df;
+  --nec-text-muted: #9a94aa;
+  --nec-border-dark: rgba(214, 169, 58, 0.22);
+  --nec-panel-dark: rgba(5, 8, 22, 0.82);
+  --nec-panel-dark-2: rgba(10, 14, 32, 0.92);
+}
+
 /* ─── LIGHT MODE — Warm reading palette ──────────────────────────────── */
 :root {
   --button-outline: rgba(0,0,0, .10);

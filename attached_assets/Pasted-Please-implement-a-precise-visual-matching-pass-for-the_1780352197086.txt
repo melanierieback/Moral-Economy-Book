@@ -1,0 +1,436 @@
+Please implement a precise visual-matching pass for the book reader.
+
+I am uploading four visual assets:
+
+1. `target-mockup-nec-book-reader.png`
+
+   * This is the primary visual reference.
+   * The app should visually match this mockup as closely as possible.
+
+2. `nec-logo.png`
+
+   * This is the real Non-Extractive Capital logo.
+   * Use this exact logo image.
+   * Do not recreate it in text.
+   * Do not use the current low-quality logo treatment.
+   * Do not crop, distort, recolor, or replace it.
+
+3. `capital-that-serves-life-cover.png`
+
+   * This is the book cover artwork.
+   * Use this image directly for the large cover panel on the front page.
+   * Do not recreate the cover in CSS.
+   * Do not use the current simplified geometric placeholder.
+   * The cover should look vivid, luminous, gold, purple, and high-quality.
+
+4. `cosmic-grid-purple-background.png`
+
+   * This is the dark purple cosmic/grid background image.
+   * Use this image as the hero/background visual treatment.
+   * Do not replace it with a flat blue/purple CSS gradient.
+   * It should provide the luminous purple glow, starburst, horizon, and subtle network-line atmosphere.
+
+Goal:
+Make the existing app visually match `target-mockup-nec-book-reader.png` as closely as possible, while preserving all current functionality.
+
+Important functional constraints:
+
+* Do not rewrite, summarize, or alter the book content.
+* Do not break the LaTeX parser.
+* Do not break `book.json` generation.
+* Do not break dynamic Table of Contents behavior.
+* Do not break search.
+* Do not break anchors.
+* Do not break routing.
+* Do not break previous/next navigation.
+* Do not rebuild the app from scratch.
+* Do not add a design library.
+* Do not add a CMS.
+* Focus on component layout, CSS, asset usage, color, spacing, and typography.
+
+Primary visual target:
+Use `target-mockup-nec-book-reader.png` as the source of truth.
+
+The current app is too dim, flat, sparse, and placeholder-like.  The target mockup is:
+
+* more vivid
+* more luminous
+* more polished
+* more editorial
+* more premium
+* more visually dense
+* more gold-accented
+* more clearly branded as Non-Extractive Capital
+* more like a real designed digital book product
+
+Please match the target mockup rather than “improving” the current design generically.
+
+Global design tokens:
+Create or update CSS variables roughly as follows:
+
+```css
+:root {
+  --nec-black: #03040c;
+  --nec-navy: #070b1c;
+  --nec-deep-navy: #0a1024;
+  --nec-purple: #4b22c8;
+  --nec-purple-glow: #7b4dff;
+  --nec-gold: #d6a93a;
+  --nec-gold-soft: #e2c568;
+  --nec-ivory: #f5efe2;
+  --nec-ivory-dark: #e4d6bf;
+  --nec-text-light: #f7f0df;
+  --nec-text-muted: #9a94aa;
+  --nec-border-dark: rgba(214, 169, 58, 0.22);
+  --nec-panel-dark: rgba(5, 8, 22, 0.82);
+  --nec-panel-dark-2: rgba(10, 14, 32, 0.92);
+}
+```
+
+Global background:
+
+* The body background should be very dark navy / near-black.
+* Use `cosmic-grid-purple-background.png` as the main hero and front-page atmospheric background.
+* Apply it with:
+
+  * `background-image`
+  * `background-size: cover`
+  * `background-position: center top`
+  * a dark overlay so text remains readable
+* Do not make the page a plain flat dark rectangle.
+
+Header:
+Match the mockup header closely.
+
+Desktop header:
+
+* Height: approximately 72px.
+* Background: near-black / very dark navy, slightly translucent.
+* Border-bottom: subtle gold or purple line.
+* Left side: `nec-logo.png`, height approximately 48px, width auto.
+* Do not use the tiny, blurry, current logo.
+* Nav items on the right:
+
+  * Contents
+  * Search
+  * About
+  * NEC Home
+  * moon/dark-mode icon if already present
+* Active nav item should be gold with a thin gold underline.
+* Text should be white/off-white.
+* Header should feel premium and sharp, like the mockup.
+
+Front page hero layout:
+The hero should match the mockup layout:
+
+Desktop:
+
+* Full-width dark hero section.
+* Minimum height: approximately 620px to 720px.
+* Max content width: approximately 1320px.
+* Content arranged in two columns:
+
+  * Left column: book cover image.
+  * Right column: title and buttons.
+* The cover image should be on the left, not tiny, not schematic.
+* The text should be centered vertically relative to the cover.
+
+Hero proportions:
+
+* Left cover area: about 40% width.
+* Right title area: about 60% width.
+* Cover image width: approximately 420px to 500px on desktop.
+* Cover should have:
+
+  * border-radius: 6px to 10px
+  * subtle gold border
+  * strong but soft shadow
+  * slight glow
+* Use the uploaded `capital-that-serves-life-cover.png` directly.
+* Object fit: cover.
+* Do not crop important title text off the cover.
+
+Hero text:
+Use this exact text:
+
+Label:
+`WORKING MANUSCRIPT`
+
+Title:
+`Capital That Serves Life`
+
+Subtitle:
+`Recovering Moral Economy in an Age of Extraction`
+
+Description:
+`A reader on ownership, finance, stewardship, and the recovery of an economy ordered toward life.`
+
+Styling:
+
+* Label: small caps, letter spacing 0.22em, muted gold.
+* Title: large elegant serif, off-white, approximately 64px to 78px desktop.
+* Subtitle: serif italic, muted ivory/gold, approximately 24px to 30px.
+* Description: off-white, max width 520px, approximately 18px.
+* Add a thin gold ornamental divider between subtitle and description, similar to the mockup.
+
+Hero buttons:
+Two primary buttons under the description.
+
+Button 1:
+`Start with the Prologue →`
+
+* Gold background.
+* Dark text.
+* Rounded corners about 4px to 6px.
+* Height about 52px.
+* Width about 280px.
+* Strong visual emphasis.
+
+Button 2:
+`View Table of Contents`
+
+* Transparent/dark background.
+* Gold border.
+* Ivory text.
+* Same height as first button.
+* Width about 280px.
+
+Hero button layout:
+
+* Side by side on desktop.
+* Stacked on mobile.
+* Spacing between buttons: 18px to 24px.
+
+Hero background:
+
+* Use `cosmic-grid-purple-background.png`.
+* Add a dark overlay:
+
+  * `linear-gradient(90deg, rgba(3,4,12,.96), rgba(8,8,25,.78), rgba(3,4,12,.92))`
+* Ensure the purple starburst/glow remains visible.
+* The target should be vivid and luminous, not dim and muddy.
+
+Table of Contents section:
+The Table of Contents should match the mockup, not the current dull version.
+
+Placement:
+
+* Immediately below the hero.
+* Dark navy background continues.
+* Max width about 1200px.
+* Centered.
+* Top padding about 64px.
+* Bottom padding about 96px.
+
+Heading:
+
+* Centered or slightly left-aligned depending on current layout, but visually prominent.
+* Text: `TABLE OF CONTENTS`
+* Small caps.
+* Letter spacing about 0.24em.
+* Color: muted gold.
+* Add thin horizontal gold lines left/right or a centered ornament, like the mockup.
+
+TOC panel:
+
+* Use a dark translucent panel.
+* Background: `rgba(5, 8, 22, 0.72)` or similar.
+* Border: `1px solid rgba(214,169,58,0.20)`.
+* Border radius: 10px to 14px.
+* Box shadow: subtle purple/black shadow.
+* Rows should not look like default accordions.
+* Rows should feel like premium dark editorial UI.
+
+TOC rows:
+Each row should have:
+
+* left chapter number badge
+* small label, such as `CHAPTER 1`
+* chapter title
+* section count
+* right arrow
+* optional expand/collapse chevron
+
+Chapter number badge:
+
+* Square or rounded rectangle.
+* Border: muted gold.
+* Text: muted gold.
+* Width/height about 34px.
+* For Prologue, use a star/book icon or `PRO`.
+* For Conclusion, use `END`.
+
+Row styling:
+
+* Height about 64px to 76px.
+* Border-bottom: subtle dark/gold line.
+* Hover: slightly brighter navy/purple background.
+* Active or expanded: gold left border or gold title.
+* Chapter title should be ivory/off-white and readable.
+* Section count should be muted gray/purple, right-aligned.
+* Arrow should be gold.
+
+Expanded sections:
+
+* Indented under the chapter.
+* Smaller text.
+* Muted ivory.
+* Gold bullet or thin vertical line.
+* Reading time may appear only if already implemented.
+* Do not let expanded contents look like a file tree.
+
+Reading view:
+Match the mockup reading view more closely.
+
+Overall:
+
+* Keep the dark NEC frame/header/sidebar.
+* Main reading surface should be ivory/off-white.
+* The reading page should look like a book page placed inside a dark interface.
+
+Header:
+
+* Use `nec-logo.png` at top-left.
+* Top header dark, about 64px to 72px high.
+* Add `← Back to Contents` in gold near the top.
+* Search/bookmark/dark-mode controls on the right if already present.
+
+Sidebar / contents outline:
+
+* Dark navy panel on the left.
+* Width about 280px to 320px desktop.
+* Background: near-black / deep navy.
+* The real NEC logo should appear at the top.
+* Progress bar near the top:
+
+  * label like `48% COMPLETE`
+  * purple/gold progress line
+* Contents outline label in small caps.
+* Active section should be gold.
+* Inactive sections should be muted ivory/gray.
+* Include a button near bottom:
+  `VIEW FULL CONTENTS`
+* Do not let the sidebar dominate the reading surface visually, but it should look polished and intentional.
+
+Main reading surface:
+
+* Background: `var(--nec-ivory)`.
+* Text: near-black.
+* Max readable width: 720px to 820px.
+* Padding top: 72px.
+* Padding sides: 72px desktop, 28px mobile.
+* Body font: elegant serif.
+* Body font size: 18px to 20px.
+* Line height: 1.72 to 1.85.
+* Paragraph spacing: generous.
+
+Reading headings:
+
+* Small chapter label: muted gold, small caps, letter spacing.
+* Main title: large serif, near-black, around 42px to 54px desktop.
+* Decorative gold divider under heading.
+* Section headings: serif, strong, around 28px.
+
+Bottom navigation:
+
+* Ivory/dark mixed footer bar like the mockup.
+* Previous on left.
+* Next on right.
+* Progress in center, such as `Section 5 of 14`.
+* Gold progress indicator.
+* Keep it elegant and unobtrusive.
+
+Mobile:
+Match the mockup mobile direction:
+
+* Header with NEC logo.
+* Hero stacks vertically.
+* Cover image centered, width about 260px to 320px.
+* Title below or beside depending on space.
+* Buttons stacked full-width.
+* Table of Contents as dark card rows.
+* Reading view should show:
+
+  * `← Back to Contents`
+  * no permanent sidebar
+  * readable ivory page
+  * bottom previous/next controls
+
+Asset implementation details:
+Put the uploaded assets into `/public/assets/`:
+
+```text
+/public/assets/target-mockup-nec-book-reader.png
+/public/assets/nec-logo.png
+/public/assets/capital-that-serves-life-cover.png
+/public/assets/cosmic-grid-purple-background.png
+```
+
+Reference them in React/CSS like:
+
+```jsx
+<img src="/assets/nec-logo.png" alt="Non-Extractive Capital" />
+<img src="/assets/capital-that-serves-life-cover.png" alt="Capital That Serves Life book cover" />
+```
+
+Use the background image in CSS like:
+
+```css
+.hero {
+  background-image:
+    linear-gradient(90deg, rgba(3,4,12,.96), rgba(8,8,25,.78), rgba(3,4,12,.92)),
+    url('/assets/cosmic-grid-purple-background.png');
+  background-size: cover;
+  background-position: center top;
+}
+```
+
+Specific things to fix from the current version:
+
+* The current cover graphic is too simple and ugly.  Replace it entirely with `capital-that-serves-life-cover.png`.
+* The current background is too flat and dim.  Replace it with `cosmic-grid-purple-background.png` plus overlay.
+* The current NEC logo is too low-quality and too small.  Replace it with the real uploaded `nec-logo.png`.
+* The current colors are too dull.  Increase contrast and saturation to match the mockup.
+* The current Table of Contents rows look too dim and generic.  Make them closer to the mockup with stronger gold accents, clearer text, and better spacing.
+* The current title/hero text feels too weak.  Increase size, contrast, and typographic hierarchy.
+* The current reading view is acceptable structurally but not polished enough.  Make it more like the mockup with a refined dark frame and ivory book page.
+
+Do not do:
+
+* Do not generate a new cover.
+* Do not create another abstract placeholder.
+* Do not use a text-only NEC logo.
+* Do not flatten the purple background into a plain gradient.
+* Do not change the manuscript text.
+* Do not change the parser unless absolutely necessary.
+* Do not introduce unrelated brand names.
+* Do not add a new UI framework.
+* Do not overcomplicate the app.
+
+Implementation sequence for credit efficiency:
+
+1. Add the four assets to `/public/assets/`.
+2. Replace the current logo references with `/assets/nec-logo.png`.
+3. Replace the current cover graphic with `/assets/capital-that-serves-life-cover.png`.
+4. Replace the hero/front-page background with `/assets/cosmic-grid-purple-background.png`.
+5. Update CSS variables to the NEC dark/purple/gold palette.
+6. Restyle the hero to match the mockup proportions.
+7. Restyle the Table of Contents rows to match the mockup.
+8. Restyle the reading view/sidebar/header to match the mockup.
+9. Run the build and fix only errors.
+10. Verify parser, search, anchors, ToC, and navigation still work.
+
+Acceptance criteria:
+
+* The front page visually resembles `target-mockup-nec-book-reader.png`.
+* The real `nec-logo.png` appears clearly and crisply.
+* The large cover uses `capital-that-serves-life-cover.png`.
+* The hero background uses `cosmic-grid-purple-background.png`.
+* The colors are vivid and high-contrast like the mockup.
+* The Table of Contents is dark, polished, gold-accented, and prominent.
+* The reading view has a polished NEC dark frame and comfortable ivory reading surface.
+* The app still builds successfully.
+* The parser still works.
+* The dynamic ToC still works.
+* Search still works.
+* Anchors and chapter navigation still work.
