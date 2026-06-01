@@ -1,0 +1,82 @@
+I have a LaTeX book file named `Capital_That_Serves_Life.tex`.  Please build a webapp that turns this book into a navigable long-form reader.
+
+Goal:
+Create a static web reader for the book **Capital That Serves Life: Recovering Moral Economy in an Age of Extraction**.  The reader should have a dynamic table of contents, readable chapter pages/sections, and URL anchors so readers can easily navigate and share specific parts.
+
+Please be credit-efficient:
+
+* Do not rewrite or summarize the book content.
+* Do not manually copy the book into React components.
+* Treat the LaTeX file as the source of truth.
+* Build a simple parser/converter script that reads the LaTeX file and outputs structured JSON.
+* Then render that JSON in the webapp.
+
+Architecture:
+
+* Use a lightweight React/Vite app unless the current project already has a different frontend framework.
+* Add a script, preferably `scripts/parseLatexBook.js` or similar, that reads `Capital_That_Serves_Life.tex` and generates `src/data/book.json`.
+* The generated JSON should include:
+
+  * book title
+  * chapters
+  * sections
+  * subsections, if present
+  * stable slugs for every chapter/section/subsection
+  * raw or lightly converted HTML/text content for each section
+* The app should render:
+
+  * a landing/header area with the book title
+  * a sticky left-hand table of contents on desktop
+  * a collapsible contents drawer on mobile
+  * the main reading content
+  * active TOC highlighting while scrolling
+  * previous/next chapter navigation
+  * direct anchor links for headings
+
+LaTeX parsing requirements:
+
+* Detect `\chapter{...}`, `\section{...}`, and `\subsection{...}`.
+* Ignore LaTeX preamble commands unless needed.
+* Preserve paragraphs.
+* Convert common LaTeX typography:
+
+  * `---` to an em dash or spaced dash according to site style
+  * `\emph{...}` to italic
+  * `\textit{...}` to italic
+  * `\textbf{...}` to bold
+  * LaTeX quotes to readable quotes
+  * escaped characters such as `\&`, `\%`, `\$`
+* For commands that are not recognized, degrade gracefully rather than crashing.
+* Do not attempt to fully compile LaTeX.
+* If footnotes are present, either render them inline at first or collect them at the bottom of the section.  Simplicity is fine for V1.
+
+UI requirements:
+
+* Desktop: sticky left TOC and central reading column.
+* Mobile: top bar with “Contents” button opening a drawer.
+* Reading column should be comfortable for long-form reading, max-width around 720-820px.
+* Headings should be clear and elegant.
+* The TOC should be generated from the JSON, not hard-coded.
+* The current section should highlight as the reader scrolls.
+* Every heading should have an `id` matching its slug.
+* Add “copy link” behavior for each section heading if straightforward.
+
+Branding:
+Use a restrained Non-Extractive Capital / Unified Model Sim-inspired visual direction.  If existing branding assets/styles are present in this Replit project, reuse them.  If not, use this fallback:
+
+* background: warm off-white
+* main text: near-black
+* accent: deep navy / Marian blue
+* secondary accent: muted gold or parchment
+* typography: serif for book title and chapter headings; clean sans-serif for navigation
+* tone: serious, readable, elegant, and non-flashy
+
+Acceptance criteria:
+
+* Running the app displays the book.
+* The TOC is generated dynamically from the LaTeX-derived JSON.
+* Clicking TOC entries scrolls to the correct section.
+* The active section is highlighted while scrolling.
+* Mobile navigation works.
+* The parser can be rerun when the LaTeX file changes.
+* The app should not require a backend database.

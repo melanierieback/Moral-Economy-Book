@@ -1,44 +1,62 @@
-# [Project name]
+# Capital That Serves Life — Web Reader
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A navigable long-form web reader for the book *Capital That Serves Life: Recovering Moral Economy in an Age of Extraction*.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/book-reader run dev` — run the web reader (set by workflow)
+- `pnpm --filter @workspace/scripts run parse-book` — re-run the LaTeX parser to regenerate book.json
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- Frontend: React + Vite + Tailwind CSS v4
+- Fonts: Lora (serif, for headings & body) + Inter (sans, for navigation)
+- Routing: wouter
+- No backend — fully static, no database
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `attached_assets/Capital_That_Serves_Life_1780345238370.tex` — source LaTeX book file (source of truth)
+- `scripts/src/parseLatexBook.mjs` — LaTeX → JSON parser script
+- `artifacts/book-reader/src/data/book.json` — generated structured book data
+- `artifacts/book-reader/src/` — React app source
+  - `types/book.ts` — TypeScript types for book structure
+  - `lib/book.ts` — data access helpers
+  - `pages/Reader.tsx` — main reader layout (sidebar TOC + content)
+  - `components/TOC.tsx` — sticky table of contents with scrollspy
+  - `components/ChapterView.tsx` — chapter renderer with prev/next nav
+  - `components/SectionContent.tsx` — section/paragraph renderer with copy-link
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- LaTeX is parsed at build time into `book.json`; the React app imports it statically (no runtime fetch needed).
+- Scrollspy uses IntersectionObserver watching all chapter/section heading IDs.
+- TOC expands section links only for the currently active chapter to keep the sidebar scannable.
+- Em dashes, curly quotes, and common LaTeX formatting are converted in both titles and content.
+- Dark mode is toggled via CSS class on `document.documentElement`, stored in component state.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+A single-page long-form reader with:
+- Deep navy sidebar with sticky TOC (desktop) or mobile drawer
+- Warm off-white reading column capped at 820px, serif book typography
+- Active TOC highlight follows reader scroll position
+- Copy-link button on every section heading
+- Previous/next chapter navigation at the bottom of each chapter
+- Dark mode toggle
+- Re-runnable parser: update the `.tex` file and run `parse-book` to regenerate
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+_Populate as you build._
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Always run `pnpm --filter @workspace/scripts run parse-book` after editing the `.tex` source to regenerate `book.json`.
+- The `@assets/` import alias points to `attached_assets/` — use it for any attached image files.
 
 ## Pointers
 

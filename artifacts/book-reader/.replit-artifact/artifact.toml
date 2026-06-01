@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Capital That Serves Life"
+version = "1.0.0"
+id = "artifacts/book-reader"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21545
+
+[services.development]
+run = "pnpm --filter @workspace/book-reader run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/book-reader", "run", "build" ]
+publicDir = "artifacts/book-reader/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21545"
+BASE_PATH = "/"
