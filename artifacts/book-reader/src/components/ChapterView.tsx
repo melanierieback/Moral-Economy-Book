@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, ArrowUp } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 import type { Chapter } from "../types/book";
 import { SectionContent } from "./SectionContent";
 import { book } from "../lib/book";
@@ -6,20 +6,22 @@ import { book } from "../lib/book";
 interface ChapterViewProps {
   chapter: Chapter;
   chapterIndex: number;
+  prevChapter?: Chapter | null;
+  nextChapter?: Chapter | null;
   onNavigateChapter: (slug: string) => void;
 }
 
-export function ChapterView({ chapter, chapterIndex, onNavigateChapter }: ChapterViewProps) {
-  const prevChapter = chapterIndex > 0 ? book.chapters[chapterIndex - 1] : null;
-  const nextChapter = chapterIndex < book.chapters.length - 1 ? book.chapters[chapterIndex + 1] : null;
-
+export function ChapterView({
+  chapter,
+  chapterIndex,
+  prevChapter,
+  nextChapter,
+  onNavigateChapter,
+}: ChapterViewProps) {
   const shortTitle = (title: string) => title.replace(/^Chapter \d+:\s*/, "");
 
-  const scrollTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  const scrollTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
-  // Label: "Prologue" / "Conclusion" / "Chapter N"
   const chapterLabel = () => {
     if (chapterIndex === 0) return "Prologue";
     if (chapterIndex === book.chapters.length - 1) return "Conclusion";
@@ -55,35 +57,31 @@ export function ChapterView({ chapter, chapterIndex, onNavigateChapter }: Chapte
         ))}
       </div>
 
-      {/* Chapter footer navigation */}
+      {/* Footer navigation */}
       <footer className="mt-16 pt-8 border-t border-border">
         <nav
           className="flex items-center justify-between gap-4"
-          aria-label="Chapter navigation"
+          aria-label="Within-chapter navigation"
         >
           {prevChapter ? (
             <button
               onClick={() => onNavigateChapter(prevChapter.slug)}
               data-testid={`nav-prev-${prevChapter.slug}`}
-              aria-label={`Previous chapter: ${shortTitle(prevChapter.title)}`}
-              className="group flex items-center gap-2 text-left max-w-[42%] text-sm font-sans text-muted-foreground hover:text-primary transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded"
+              aria-label={`Previous: ${shortTitle(prevChapter.title)}`}
+              className="group flex items-center gap-1.5 text-left max-w-[42%] text-sm font-sans text-muted-foreground hover:text-primary transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded"
             >
-              <ChevronLeft
-                size={15}
-                className="shrink-0 group-hover:-translate-x-0.5 transition-transform"
-              />
+              <span className="text-lg leading-none group-hover:-translate-x-0.5 transition-transform inline-block">←</span>
               <span className="truncate leading-snug">{shortTitle(prevChapter.title)}</span>
             </button>
           ) : (
             <div />
           )}
 
-          {/* Back to top */}
           <button
             onClick={scrollTop}
             data-testid="button-back-to-top"
-            aria-label="Back to top"
-            className="shrink-0 text-[11px] font-sans text-muted-foreground/50 hover:text-primary transition-colors flex items-center gap-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded"
+            aria-label="Back to top of chapter"
+            className="shrink-0 text-[11px] font-sans text-muted-foreground/45 hover:text-primary transition-colors flex items-center gap-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded"
           >
             <ArrowUp size={12} />
             <span>Top</span>
@@ -93,14 +91,11 @@ export function ChapterView({ chapter, chapterIndex, onNavigateChapter }: Chapte
             <button
               onClick={() => onNavigateChapter(nextChapter.slug)}
               data-testid={`nav-next-${nextChapter.slug}`}
-              aria-label={`Next chapter: ${shortTitle(nextChapter.title)}`}
-              className="group flex items-center gap-2 text-right max-w-[42%] text-sm font-sans text-muted-foreground hover:text-primary transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded ml-auto"
+              aria-label={`Next: ${shortTitle(nextChapter.title)}`}
+              className="group flex items-center gap-1.5 text-right max-w-[42%] text-sm font-sans text-muted-foreground hover:text-primary transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded ml-auto"
             >
               <span className="truncate leading-snug">{shortTitle(nextChapter.title)}</span>
-              <ChevronRight
-                size={15}
-                className="shrink-0 group-hover:translate-x-0.5 transition-transform"
-              />
+              <span className="text-lg leading-none group-hover:translate-x-0.5 transition-transform inline-block">→</span>
             </button>
           ) : (
             <div />

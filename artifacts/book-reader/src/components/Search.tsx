@@ -80,7 +80,7 @@ function highlightSnippet(snippet: string, query: string): string {
 }
 
 interface SearchProps {
-  onNavigate?: () => void;
+  onNavigate?: (slug: string) => void;
 }
 
 export function Search({ onNavigate }: SearchProps) {
@@ -155,7 +155,7 @@ export function Search({ onNavigate }: SearchProps) {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
     closeSearch();
-    onNavigate?.();
+    onNavigate?.(targetSlug);
   }, [closeSearch, onNavigate]);
 
   // Keyboard shortcut: Cmd+K / Ctrl+K

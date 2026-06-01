@@ -4,7 +4,8 @@ import { book } from "../lib/book";
 
 interface TOCProps {
   activeSlug: string;
-  onNavigate?: () => void;
+  onNavigate?: (slug: string) => void;
+  onChapterNavigate?: (slug: string) => void;
   scrollProgress?: number;
 }
 
@@ -15,7 +16,7 @@ function getActiveChapterSlug(activeSlug: string): string {
   return chapter?.slug ?? "";
 }
 
-export function TOC({ activeSlug, onNavigate, scrollProgress = 0 }: TOCProps) {
+export function TOC({ activeSlug, onNavigate, onChapterNavigate, scrollProgress = 0 }: TOCProps) {
   const activeChapterSlug = getActiveChapterSlug(activeSlug);
   // Track manually toggled chapters (override auto-expand behavior)
   const [manualExpanded, setManualExpanded] = useState<Set<string>>(new Set());
@@ -70,10 +71,9 @@ export function TOC({ activeSlug, onNavigate, scrollProgress = 0 }: TOCProps) {
       const el = document.getElementById(slug);
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
-        // Update hash
         history.replaceState(null, "", `#${slug}`);
       }
-      onNavigate?.();
+      onNavigate?.(slug);
     },
     [onNavigate]
   );
@@ -150,7 +150,7 @@ export function TOC({ activeSlug, onNavigate, scrollProgress = 0 }: TOCProps) {
                 {/* Chapter title button */}
                 <button
                   ref={isActive ? (activeRef as React.RefObject<HTMLButtonElement>) : undefined}
-                  onClick={() => scrollToSlug(chapter.slug)}
+                  onClick={() => onChapterNavigate ? onChapterNavigate(chapter.slug) : scrollToSlug(chapter.slug)}
                   data-testid={`toc-chapter-${chapter.slug}`}
                   aria-current={isActive ? "location" : undefined}
                   className={`flex-1 text-left px-2 py-1.5 rounded text-[0.77rem] font-sans leading-snug transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sidebar-primary focus-visible:outline-offset-1 ${

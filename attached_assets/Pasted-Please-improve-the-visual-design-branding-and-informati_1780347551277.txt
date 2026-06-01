@@ -1,0 +1,106 @@
+Please improve the visual design, branding, and information architecture of the book reader.
+
+Important:
+
+* Do not rewrite or alter the book content.
+* Do not break the LaTeX parser, generated `book.json`, dynamic Table of Contents, search, anchors, or reader navigation.
+* Keep the app statically deployable.
+* Focus on visual polish, branding accuracy, and reader navigation.
+
+Branding:
+
+* This reader should be branded as **Non-Extractive Capital**.
+* The header/site identity should say: **Non-Extractive Capital**.
+* Do not invent or use unrelated organization names.
+* If existing NEC logo assets are present, use them.
+* If no logo asset is available, create a simple text-based mark using “Non-Extractive Capital” in a restrained, elegant style.
+
+Core design change:
+Please restructure the reader around two primary views:
+
+1. Front Page / Table of Contents view
+
+* This should be the main landing page.
+* The Table of Contents should be prominent, central, and beautiful - not hidden in a sidebar.
+* The front page should include:
+
+  * NEC-branded header
+  * book cover art or cover-art panel
+  * title: “Capital That Serves Life”
+  * subtitle: “Recovering Moral Economy in an Age of Extraction”
+  * short description: “A reader on ownership, finance, stewardship, and the recovery of an economy ordered toward life.”
+  * prominent Table of Contents card or section
+  * Prologue, Chapters 1-17, and Conclusion
+  * expandable chapter sections if already implemented
+  * “Start with the Prologue” button
+  * optional “Continue where you left off” link if easy to implement
+* The front page should feel like the entrance to a serious online book, not like a generic document viewer.
+
+2. Reading View
+
+* Individual chapters/sections should open into a calm reading page.
+* Add a very visible navigation control near the top:
+
+  * “← Back to Table of Contents”
+* Add breadcrumb navigation if easy:
+
+  * “Contents / Chapter X / Section Y”
+* Keep a compact chapter/section outline visible on desktop if helpful, but the main navigation should be back to the full Table of Contents.
+* Include previous/next section navigation at the bottom.
+* Include a small progress indicator.
+* On mobile, make the “Back to Table of Contents” control easy to reach.
+
+Visual direction:
+
+* Use the Non-Extractive Capital visual identity if already present.
+* If existing colors/styles are not available, use this fallback palette:
+
+  * warm parchment / off-white background
+  * near-black text
+  * deep navy / Marian blue primary accent
+  * muted gold secondary accent
+  * optional restrained burgundy highlights
+* Typography:
+
+  * elegant serif for the book title and chapter headings
+  * clean sans-serif for navigation and UI
+* The design should feel:
+
+  * editorial
+  * beautiful
+  * book-like
+  * contemplative
+  * serious
+  * morally grounded
+  * modern but not startup-generic
+
+Cover art:
+
+* Add or improve a beautiful cover-art panel.
+* It should evoke:
+
+  * moral economy
+  * stewardship
+  * capital ordered toward life
+  * governance
+  * roots / rivers / branching networks
+  * illuminated manuscript meets contemporary systems design
+* It can be built with CSS/SVG/HTML if that is more efficient than adding an external image.
+* Avoid:
+
+  * stock market charts
+  * generic finance imagery
+  * crypto aesthetics
+  * AI robots
+  * cheesy hands-holding-plant imagery
+  * invented external organization branding
+
+Acceptance criteria:
+
+* The header says **Non-Extractive Capital**.
+* The landing page has a prominent, beautiful Table of Contents.
+* The reader view has a clearly visible “← Back to Table of Contents” button.
+* Prologue, Chapters 1-17, and Conclusion remain navigable.
+* Search, anchors, and existing parser behavior still work.
+* Mobile layout remains clean and usable.
+* The site still builds successfully.
