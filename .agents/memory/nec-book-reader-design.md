@@ -1,32 +1,50 @@
 ---
 name: NEC Book Reader Design System
-description: Visual identity conventions for the Capital That Serves Life book reader — dark NEC branding, color palette, key components.
+description: Visual identity conventions for the Capital That Serves Life book reader — dark NEC branding, color palette, key components, and layout.
 ---
 
-## Core palette (hardcoded in homepage/reader header — not CSS vars)
-- Hero bg: `radial-gradient(ellipse at 44% 42%, #2e1b6a 0%, #1a1042 28%, #0d0c28 55%, #060712 82%, #030410 100%)`
-- TOC bg: `linear-gradient(180deg, #080a1c 0%, #050611 100%)`
-- Reader sidebar bg: `#060718`
-- Gold accent: `rgba(201,160,58,…)` — used for labels, borders, chapter numbers, node dots
-- CTA button: `linear-gradient(135deg, #4a28c4 0%, #3a20a8 100%)` with purple glow shadow
+## Core palette (hardcoded in homepage/reading header — not CSS vars)
+- Hero bg: `.nec-hero` radial-gradient ellipse `#2e1b6a → #1a1042 → #0d0c28 → #030410`
+- TOC bg: `.nec-toc-bg` linear `#080a1c → #050611`
+- Reader sidebar bg: `#060718` (hardcoded inline style on `<aside>`)
+- Header: `.nec-header` — `rgba(5,6,17,0.92)` + backdrop-blur:12px
+- Reading header: `.nec-reading-header` — `rgba(6,7,18,0.96)` + gold-tinted border `rgba(201,160,58,0.12)`
+- Gold accent: `rgba(201,160,58,…)` — labels, borders, badge numbers, ornamental dividers
+- Primary CTA: `linear-gradient(135deg, #c9a03a 0%, #a87828 100%)` dark text `#0a0810` — GOLD, not purple
+- Secondary CTA: outlined, `rgba(255,255,255,0.16)` border, `rgba(240,232,210,0.70)` text
+
+## Hero layout (HomePage.tsx)
+- Always dark (hardcoded colors — dark mode toggle only affects the reading surface)
+- Two columns: **cover art LEFT** (`w-[400px]` at lg), **book info RIGHT** (flex-1)
+- Mobile: stacks vertically (cover first, info second)
+- Hero body uses `items-start` + `pt-14 md:pt-20` — NOT `items-center` (avoids centering in full viewport)
+- `min-h-screen` keeps it full-page but content is top-anchored
+
+## Header nav (home page)
+- Center: "Contents" (underline active state), "Search" (uses `<Search>` component), "About" (placeholder), "NEC Home ↗" (external link)
+- Right: dark mode toggle only
+
+## TOC section rows (homepage)
+- Prologue badge: ★ gold star in rounded square
+- Chapter 1-17: number in gold rounded square
+- Conclusion badge: "END" label
+- "PROLOGUE"/"CHAPTER N" small gold uppercase label
+- Chapter title (serif, hover → white)
+- "N sections" right-aligned (hidden on mobile)
+- ChevronRight expand toggle
 
 ## Key components
-- `NecLogo.tsx` — SVG starburst mark (purple panel + V-ray flare) + "NON-EXTRACTIVE / CAPITAL" text. Props: `size?: 'sm'|'md'|'lg'`.
-- `CoverArt.tsx` — dark NEC-branded SVG: purple radial bg, starburst glow at top, gold tree network below, gold border frame.
-- `StarburstDecor` (inside HomePage.tsx) — SVG overlay with 4 diagonal rays from ~(560,260) origin + CSS radial glow div.
+- `NecLogo.tsx` — SVG starburst mark V-shape (apex ~(15,11), arms → (2,34) and (31,34)) + "Non‑Extractive / Capital" text. Props: `size?: 'sm'|'md'|'lg'`.
+- `CoverArt.tsx` — dark SVG panel: title "CAPITAL THAT SERVES LIFE" + subtitle in gold serif at top, luminous starburst (apex at y=100), open book with gold pages (y=240-312), root system (y=312-400), cityscape silhouette (y=390-430), gold corner ornaments + border frame.
+- `StarburstDecor` (inside HomePage.tsx) — SVG with 4 diagonal rays from (520,300) origin + CSS radial glow div via `.nec-starburst-outer`.
+- `TOC.tsx` — "CONTENTS OUTLINE" label at top, gold progress bar, active section gold, "VIEW FULL CONTENTS" link at bottom.
+- `ChapterView.tsx` — "CHAPTER N" label gold (`rgba(201,160,58,0.65)`), then title, then gold ◆ ornamental divider (thin lines + diamond center).
+- `Reader.tsx` — dark sidebar (`#060718`) with "Back to Contents" text link, breadcrumb in reading header, `N% complete` display.
 
-## CSS classes (in index.css)
-- `.nec-hero` — radial-gradient dark purple hero bg
-- `.nec-toc-bg` — dark linear-gradient for TOC section
-- `.nec-header` — frosted dark header (backdrop-blur, rgba(5,6,17,0.92))
-- `.nec-reading-header` — reader header variant with gold-tinted border
-- `.nec-starburst-outer` — CSS radial glow layer for starburst effect
-
-## Architecture reminder
-- Home page is always dark (hardcoded colors, not CSS vars)
-- Reader sidebar is always dark (`#060718`)  
+## Architecture
+- Home page always dark (hardcoded colors)
+- Reader sidebar always dark (`#060718`)
 - Reader content area respects light/dark mode via CSS vars (`--background` = ivory in light)
-- `--primary` in light mode = `252 62% 28%` (deep purple-blue, not navy)
-- `--sidebar-primary` = gold `42 62% 58%`
+- `localStorage.setItem("nec-last-chapter", slug)` — tracks last chapter for "Continue" button
 
-**Why:** The NEC website (nec-website-7f7561.gitlab.io) uses near-black + deep blue-purple gradient + luminous starburst + white text + gold accents. The book reader should feel like a publication *inside* the NEC ecosystem.
+**Why:** NEC brand is dark navy + deep blue-purple gradient + luminous starburst + white text + gold accents. The reader should feel like a premium publication inside the NEC ecosystem. The target mockup (`target-mockup-nec-book-reader.png_1780350453421.png`) is the primary design reference.

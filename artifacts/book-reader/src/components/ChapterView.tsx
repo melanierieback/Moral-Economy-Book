@@ -11,6 +11,22 @@ interface ChapterViewProps {
   onNavigateChapter: (slug: string) => void;
 }
 
+function OrnamentalDivider() {
+  return (
+    <div className="flex items-center gap-3 my-6" aria-hidden="true">
+      <div
+        className="flex-1 h-px"
+        style={{ background: "linear-gradient(to right, transparent, rgba(201,160,58,0.28))" }}
+      />
+      <span style={{ color: "rgba(201,160,58,0.55)", fontSize: "9px" }}>◆</span>
+      <div
+        className="flex-1 h-px"
+        style={{ background: "linear-gradient(to left, transparent, rgba(201,160,58,0.28))" }}
+      />
+    </div>
+  );
+}
+
 export function ChapterView({
   chapter,
   chapterIndex,
@@ -28,6 +44,8 @@ export function ChapterView({
     return `Chapter ${chapterIndex}`;
   };
 
+  const totalSections = chapter.sections.filter((s) => s.title).length;
+
   return (
     <article
       className="min-h-[60vh]"
@@ -36,18 +54,29 @@ export function ChapterView({
     >
       {/* Chapter heading */}
       <header id={chapter.slug} className="scroll-mt-24 mb-10 md:mb-14 pt-2">
-        <div className="mb-3">
-          <span className="text-[11px] uppercase tracking-[0.22em] font-sans text-primary/50 font-medium select-none">
+        <div className="mb-3 flex items-center justify-between gap-4">
+          <span
+            className="text-[10px] uppercase tracking-[0.28em] font-sans font-semibold select-none"
+            style={{ color: "rgba(201,160,58,0.65)" }}
+          >
             {chapterLabel()}
           </span>
+          {totalSections > 0 && (
+            <span className="text-[10px] font-sans text-muted-foreground/38">
+              {totalSections} sections
+            </span>
+          )}
         </div>
+
         <h2
           id={`chapter-heading-${chapter.slug}`}
-          className="font-serif text-3xl md:text-[2.1rem] font-bold text-foreground leading-tight tracking-tight"
+          className="font-serif text-3xl md:text-[2.2rem] font-bold text-foreground leading-tight tracking-tight"
         >
           {shortTitle(chapter.title)}
         </h2>
-        <div className="mt-6 h-px bg-border" />
+
+        {/* Ornamental gold divider */}
+        <OrnamentalDivider />
       </header>
 
       {/* Sections */}
@@ -61,17 +90,21 @@ export function ChapterView({
       <footer className="mt-16 pt-8 border-t border-border">
         <nav
           className="flex items-center justify-between gap-4"
-          aria-label="Within-chapter navigation"
+          aria-label="Chapter navigation"
         >
           {prevChapter ? (
             <button
               onClick={() => onNavigateChapter(prevChapter.slug)}
               data-testid={`nav-prev-${prevChapter.slug}`}
               aria-label={`Previous: ${shortTitle(prevChapter.title)}`}
-              className="group flex items-center gap-1.5 text-left max-w-[42%] text-sm font-sans text-muted-foreground hover:text-primary transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded"
+              className="group flex flex-col gap-0.5 text-left max-w-[42%] focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded"
             >
-              <span className="text-lg leading-none group-hover:-translate-x-0.5 transition-transform inline-block">←</span>
-              <span className="truncate leading-snug">{shortTitle(prevChapter.title)}</span>
+              <span className="text-[10px] uppercase tracking-[0.18em] font-sans text-muted-foreground/35">
+                ← Previous
+              </span>
+              <span className="text-sm font-sans text-muted-foreground group-hover:text-primary transition-colors truncate leading-snug">
+                {shortTitle(prevChapter.title)}
+              </span>
             </button>
           ) : (
             <div />
@@ -80,11 +113,11 @@ export function ChapterView({
           <button
             onClick={scrollTop}
             data-testid="button-back-to-top"
-            aria-label="Back to top of chapter"
-            className="shrink-0 text-[11px] font-sans text-muted-foreground/45 hover:text-primary transition-colors flex items-center gap-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded"
+            aria-label="Back to top"
+            className="shrink-0 text-[10px] font-sans text-muted-foreground/35 hover:text-primary transition-colors flex flex-col items-center gap-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded"
           >
-            <ArrowUp size={12} />
-            <span>Top</span>
+            <ArrowUp size={11} />
+            <span className="uppercase tracking-[0.18em]">Top</span>
           </button>
 
           {nextChapter ? (
@@ -92,10 +125,14 @@ export function ChapterView({
               onClick={() => onNavigateChapter(nextChapter.slug)}
               data-testid={`nav-next-${nextChapter.slug}`}
               aria-label={`Next: ${shortTitle(nextChapter.title)}`}
-              className="group flex items-center gap-1.5 text-right max-w-[42%] text-sm font-sans text-muted-foreground hover:text-primary transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded ml-auto"
+              className="group flex flex-col gap-0.5 text-right max-w-[42%] ml-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded"
             >
-              <span className="truncate leading-snug">{shortTitle(nextChapter.title)}</span>
-              <span className="text-lg leading-none group-hover:translate-x-0.5 transition-transform inline-block">→</span>
+              <span className="text-[10px] uppercase tracking-[0.18em] font-sans text-muted-foreground/35 self-end">
+                Next →
+              </span>
+              <span className="text-sm font-sans text-muted-foreground group-hover:text-primary transition-colors truncate leading-snug">
+                {shortTitle(nextChapter.title)}
+              </span>
             </button>
           ) : (
             <div />

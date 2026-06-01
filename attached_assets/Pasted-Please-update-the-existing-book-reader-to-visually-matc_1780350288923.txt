@@ -1,0 +1,170 @@
+Please update the existing book reader to visually match the uploaded mockup image as closely as possible.
+
+I am providing:
+
+1. A target mockup image showing the desired visual and graphical layout.
+2. The real Non-Extractive Capital logo.
+3. Screenshots of the existing Non-Extractive Capital / DSF website for house-style reference.
+
+Please treat the mockup image as the primary design target.  The goal is not to invent a new design, but to reproduce the mockup’s layout, visual hierarchy, colors, spacing, and overall atmosphere as closely as practical in the existing React/Vite app.
+
+Important:
+
+* Do not rewrite, summarize, or alter the book content.
+* Do not break the LaTeX parser, generated `book.json`, dynamic Table of Contents, search, anchors, routing, or reader navigation.
+* Do not rebuild the app from scratch.
+* Do not spend time adding new features unless needed to match the mockup.
+* Focus on CSS/layout/component styling and only minimal component restructuring.
+* Keep the app statically deployable.
+
+Primary design target:
+Please reproduce the uploaded mockup’s overall structure:
+
+1. Dark NEC-branded outer environment
+
+* Very dark navy / near-black background.
+* Purple-blue luminous gradients.
+* Starburst / light flare motif.
+* Subtle network/constellation linework.
+* High-contrast white/off-white text.
+* Muted gold accents.
+* Clean modern NEC-style header.
+
+2. Real NEC branding
+
+* Use the uploaded Non-Extractive Capital logo.
+* Place it in the header/top-left area, as in the mockup.
+* Do not use an invented logo or text-only substitute if the image loads.
+* Do not use any organization name other than Non-Extractive Capital.
+
+3. Front page / hero
+   The front page should look much closer to the mockup:
+
+* Dark luminous background, not a flat blue block.
+* NEC logo/header at top.
+* Large book title: “Capital That Serves Life”
+* Subtitle: “Recovering Moral Economy in an Age of Extraction”
+* Label: “Working Manuscript”
+* Description: “A reader on ownership, finance, stewardship, and the recovery of an economy ordered toward life.”
+* Primary button: “Start with the Prologue”
+* Secondary button: “View Table of Contents”
+* Optional continue-reading button if already implemented.
+* Cover-art panel on the side, visually similar to the mockup: dark navy/black, purple glow, gold linework, book/tree/root/capital-flow symbolism.
+
+4. Cover art panel
+   Please make the cover-art panel look much closer to the mockup:
+
+* dark framed book-cover object
+* purple starburst / luminous center
+* fine muted-gold linework
+* open book or manuscript motif
+* roots / branching networks / flows of capital
+* serious, editorial, NEC-compatible
+* not a simple abstract node diagram
+* not a generic SaaS graphic
+
+This can be implemented with CSS/SVG/HTML to save time.  Do not depend on external image APIs.
+
+5. Table of Contents front-page section
+   The Table of Contents should be prominent and visually similar to the mockup:
+
+* dark card/panel treatment rather than plain pale list
+* centered, spacious layout
+* title “Table of Contents”
+* chapter rows with:
+
+  * chapter number or prologue marker
+  * chapter label
+  * chapter title
+  * section count
+  * arrow/expand affordance
+* muted gold for chapter numbers, active states, small labels, and dividers
+* subtle borders and dark-panel layering
+* clean hover states
+* expandable sections where currently available
+* must include Prologue, Chapters 1-17, and Conclusion
+
+Do not make the ToC look like a default file tree or default accordion.
+
+6. Reading view
+   The reading view should also move closer to the mockup:
+
+* dark NEC header/sidebar or dark outer frame
+* clear “← Back to Contents” control
+* search/bookmark/dark-mode controls if already present
+* reading progress indicator
+* optional contents outline on desktop
+* main reading surface should remain comfortable and ivory/off-white
+* body text should remain readable
+* chapter/section headings should feel elegant and editorial
+* previous/next navigation at the bottom should be refined
+* avoid the current overly plain white-page + utilitarian sidebar feeling
+
+7. Mobile views
+   Please also make the mobile layout follow the mockup direction:
+
+* compact NEC logo/header
+* cover/title front page adapted to mobile
+* “Start with the Prologue” and “View Table of Contents” buttons
+* mobile ToC as dark cards
+* reading view with visible “Back to Contents”
+
+Style references:
+Use the uploaded NEC/DSF screenshots as secondary house-style references:
+
+* dark navy / black
+* purple luminous glow
+* starburst motif
+* mission-driven technical atmosphere
+* clean modern sans-serif navigation
+* premium dark interface
+* restrained but striking visual language
+
+Typography:
+
+* Use a clean modern sans-serif for NEC navigation and UI.
+* Use an elegant serif for the book title, chapter titles, and body text where readable.
+* Use small caps sparingly for labels such as “Working Manuscript,” “Chapter,” and “Table of Contents.”
+* Improve hierarchy, spacing, and contrast.
+
+Color guidance:
+Please use a palette close to the mockup:
+
+* main background: near-black / very dark navy
+* gradient: deep purple / blue-violet glow
+* text on dark: white / ivory
+* reading surface: ivory / warm off-white
+* accents: muted gold
+* secondary UI accents: soft purple / blue
+* avoid washed-out gray text
+* avoid large flat solid-color blocks
+
+Credit-efficiency instructions:
+
+* First identify the existing components responsible for:
+
+  * header
+  * hero/front page
+  * cover art
+  * Table of Contents
+  * reading view
+  * sidebar/outline
+* Then make targeted changes to those components and their CSS.
+* Prefer CSS variables/theme tokens for colors.
+* Prefer CSS/SVG for the cover art rather than adding new dependencies.
+* Do not add a design library.
+* Do not change the parser unless absolutely required.
+* Do not change `book.json` generation unless absolutely required.
+
+Acceptance criteria:
+
+* The app visually resembles the uploaded mockup much more closely than the current version.
+* The front page has a dark NEC-style luminous hero.
+* The real NEC logo is used.
+* The cover-art panel looks rich and intentional.
+* The Table of Contents is prominent, beautiful, dark, and mockup-like.
+* The reading view has a clear “← Back to Contents” button.
+* The reading text remains comfortable and readable.
+* Prologue, Chapters 1-17, and Conclusion remain navigable.
+* Search, anchors, parser behavior, routing, and mobile layout still work.
+* The app builds successfully.

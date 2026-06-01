@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { ChevronRight, ArrowRight, ArrowDown, Sun, Moon, Search as SearchIcon } from "lucide-react";
+import { ChevronRight, ArrowRight, ArrowDown, Sun, Moon, ExternalLink } from "lucide-react";
 import { book } from "../lib/book";
 import { CoverArt } from "../components/CoverArt";
 import { NecLogo } from "../components/NecLogo";
@@ -14,59 +14,92 @@ interface HomePageProps {
 function chapterLabel(idx: number, total: number): string {
   if (idx === 0) return "Prologue";
   if (idx === total - 1) return "Conclusion";
-  return `Ch. ${idx}`;
+  return `Chapter ${idx}`;
+}
+
+function chapterBadge(idx: number, total: number) {
+  if (idx === 0) {
+    return (
+      <span
+        className="shrink-0 flex items-center justify-center w-7 h-7 text-[12px] rounded"
+        style={{
+          background: "rgba(201,160,58,0.12)",
+          border: "1px solid rgba(201,160,58,0.30)",
+          color: "rgba(201,160,58,0.85)",
+        }}
+        aria-hidden="true"
+      >
+        ★
+      </span>
+    );
+  }
+  if (idx === total - 1) {
+    return (
+      <span
+        className="shrink-0 flex items-center justify-center w-7 h-7 text-[9px] font-sans font-bold tracking-wide rounded"
+        style={{
+          background: "rgba(201,160,58,0.10)",
+          border: "1px solid rgba(201,160,58,0.22)",
+          color: "rgba(201,160,58,0.65)",
+        }}
+        aria-hidden="true"
+      >
+        END
+      </span>
+    );
+  }
+  return (
+    <span
+      className="shrink-0 flex items-center justify-center w-7 h-7 text-[11px] font-sans font-bold rounded"
+      style={{
+        background: "rgba(201,160,58,0.10)",
+        border: "1px solid rgba(201,160,58,0.22)",
+        color: "rgba(201,160,58,0.72)",
+        fontVariantNumeric: "tabular-nums",
+      }}
+      aria-hidden="true"
+    >
+      {idx}
+    </span>
+  );
 }
 
 function StarburstDecor() {
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
-      {/* Main starburst glow blob */}
       <div
         className="absolute nec-starburst-outer"
-        style={{
-          top: "5%",
-          left: "30%",
-          width: "70%",
-          height: "90%",
-          transform: "translate(-20%, 0)",
-        }}
+        style={{ top: "-5%", left: "25%", width: "75%", height: "105%" }}
       />
-      {/* Rays — SVG overlay */}
       <svg
         className="absolute inset-0 w-full h-full"
         viewBox="0 0 1280 800"
         preserveAspectRatio="xMidYMid slice"
-        xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          <linearGradient id="homeRayL" x1="560" y1="260" x2="80" y2="780" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#f5e8c0" stopOpacity="0.22" />
+          <linearGradient id="hpRayL" x1="520" y1="300" x2="80" y2="750" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#f5e8c0" stopOpacity="0.14" />
             <stop offset="100%" stopColor="#c49030" stopOpacity="0" />
           </linearGradient>
-          <linearGradient id="homeRayR" x1="560" y1="260" x2="1050" y2="780" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#f0dca0" stopOpacity="0.15" />
+          <linearGradient id="hpRayR" x1="520" y1="300" x2="1000" y2="750" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#f0dca0" stopOpacity="0.10" />
             <stop offset="100%" stopColor="#b08020" stopOpacity="0" />
           </linearGradient>
-          <linearGradient id="homeRayUR" x1="560" y1="260" x2="1280" y2="20" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#f0e0b0" stopOpacity="0.10" />
+          <linearGradient id="hpRayUR" x1="520" y1="300" x2="1280" y2="40" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#f0e0b0" stopOpacity="0.08" />
             <stop offset="100%" stopColor="#d4a040" stopOpacity="0" />
           </linearGradient>
-          <linearGradient id="homeRayUL" x1="560" y1="260" x2="0" y2="80" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#e8d8a0" stopOpacity="0.08" />
+          <linearGradient id="hpRayUL" x1="520" y1="300" x2="80" y2="60" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#e8d8a0" stopOpacity="0.06" />
             <stop offset="100%" stopColor="#c09028" stopOpacity="0" />
           </linearGradient>
         </defs>
-        {/* Diagonal rays from the starburst origin */}
-        <line x1="560" y1="260" x2="80" y2="790" stroke="url(#homeRayL)" strokeWidth="1.5" />
-        <line x1="560" y1="260" x2="1060" y2="790" stroke="url(#homeRayR)" strokeWidth="1" />
-        <line x1="560" y1="260" x2="1280" y2="18" stroke="url(#homeRayUR)" strokeWidth="0.8" />
-        <line x1="560" y1="260" x2="0" y2="75" stroke="url(#homeRayUL)" strokeWidth="0.6" />
-        {/* Horizontal faint cross */}
-        <line x1="0" y1="262" x2="1280" y2="258" stroke="#d4a040" strokeWidth="0.3" strokeOpacity="0.06" />
-        {/* Bright core */}
-        <circle cx="560" cy="260" r="4" fill="#f9f5e0" fillOpacity="0.35" />
-        <circle cx="560" cy="260" r="12" fill="#e8c870" fillOpacity="0.08" />
-        <circle cx="560" cy="260" r="30" fill="#7040c0" fillOpacity="0.06" />
+        <line x1="520" y1="300" x2="80" y2="760" stroke="url(#hpRayL)" strokeWidth="1.2" />
+        <line x1="520" y1="300" x2="1010" y2="760" stroke="url(#hpRayR)" strokeWidth="0.9" />
+        <line x1="520" y1="300" x2="1280" y2="35" stroke="url(#hpRayUR)" strokeWidth="0.7" />
+        <line x1="520" y1="300" x2="80" y2="55" stroke="url(#hpRayUL)" strokeWidth="0.5" />
+        <circle cx="520" cy="300" r="3" fill="#f9f5e0" fillOpacity="0.22" />
+        <circle cx="520" cy="300" r="10" fill="#e8c870" fillOpacity="0.06" />
       </svg>
     </div>
   );
@@ -74,6 +107,7 @@ function StarburstDecor() {
 
 export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProps) {
   const [expandedChapter, setExpandedChapter] = useState<string | null>(null);
+  const [expandAll, setExpandAll] = useState(false);
   const [continueSlug, setContinueSlug] = useState<string | null>(null);
   const tocRef = useRef<HTMLElement>(null);
 
@@ -83,9 +117,7 @@ export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProp
       if (saved && book.chapters.find((c) => c.slug === saved)) {
         setContinueSlug(saved);
       }
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
   }, []);
 
   const continueChapter = continueSlug
@@ -95,6 +127,9 @@ export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProp
   const toggleExpand = (slug: string) => {
     setExpandedChapter((prev) => (prev === slug ? null : slug));
   };
+
+  const isChapterExpanded = (slug: string) =>
+    expandAll || expandedChapter === slug;
 
   const scrollToTOC = () => {
     tocRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -110,45 +145,94 @@ export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProp
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#04050f", color: "#f0ede6" }}>
 
-      {/* ── HERO SECTION ──────────────────────────────────────────────── */}
+      {/* ── HERO SECTION ─────────────────────────────────────────────── */}
       <section className="nec-hero relative min-h-screen flex flex-col">
         <StarburstDecor />
 
         {/* Header */}
         <header className="relative z-20 nec-header">
-          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 h-16 flex items-center justify-between gap-4">
+          <div className="max-w-7xl mx-auto px-5 sm:px-8 h-[60px] flex items-center justify-between gap-6">
             <NecLogo size="sm" />
-            <div className="flex items-center gap-3">
+
+            {/* Center nav */}
+            <nav className="hidden md:flex items-center gap-1" aria-label="Site navigation">
+              <button
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                className="px-3 py-1.5 text-[12px] font-sans font-medium transition-colors rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30 relative"
+                style={{ color: "rgba(240,232,210,0.88)" }}
+              >
+                Contents
+                <span
+                  className="absolute bottom-0 left-3 right-3 h-px"
+                  style={{ background: "rgba(201,160,58,0.65)" }}
+                />
+              </button>
+              <div className="w-px h-3 mx-1" style={{ background: "rgba(255,255,255,0.1)" }} />
               <Search onNavigate={handleSearchNavigate} />
+              <div className="w-px h-3 mx-1" style={{ background: "rgba(255,255,255,0.1)" }} />
+              <button
+                className="px-3 py-1.5 text-[12px] font-sans transition-colors rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30"
+                style={{ color: "rgba(240,232,210,0.38)" }}
+              >
+                About
+              </button>
+              <div className="w-px h-3 mx-1" style={{ background: "rgba(255,255,255,0.08)" }} />
+              <a
+                href="https://non-extractive.capital"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 px-3 py-1.5 text-[12px] font-sans transition-colors rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30"
+                style={{ color: "rgba(240,232,210,0.38)" }}
+              >
+                NEC Home
+                <ExternalLink size={10} />
+              </a>
+            </nav>
+
+            {/* Right controls */}
+            <div className="flex items-center gap-2">
+              <span className="md:hidden">
+                <Search onNavigate={handleSearchNavigate} />
+              </span>
               <button
                 onClick={onToggleDark}
-                aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-                className="text-white/40 hover:text-white/80 transition-colors p-1 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/40"
+                aria-label={darkMode ? "Switch to light reading mode" : "Switch to dark reading mode"}
+                className="text-white/35 hover:text-white/65 transition-colors p-1.5 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30"
               >
-                {darkMode ? <Sun size={15} /> : <Moon size={15} />}
+                {darkMode ? <Sun size={14} /> : <Moon size={14} />}
               </button>
             </div>
           </div>
         </header>
 
-        {/* Hero body */}
-        <div className="relative z-10 flex flex-1 items-center">
-          <div className="max-w-7xl mx-auto w-full px-6 sm:px-8 lg:px-12 py-16 md:py-24">
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-12 lg:gap-20">
+        {/* Hero body — Cover LEFT, Info RIGHT */}
+        <div className="relative z-10 flex flex-1 items-start">
+          <div className="max-w-7xl mx-auto w-full px-5 sm:px-8 pt-14 md:pt-20 pb-12">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-10 lg:gap-16">
 
-              {/* Left — book info */}
-              <div className="flex-1 min-w-0 max-w-2xl md:pt-6">
+              {/* LEFT — Cover art (prominent) */}
+              <div
+                className="shrink-0 w-[240px] sm:w-[300px] md:w-[360px] lg:w-[400px] rounded shadow-2xl"
+                style={{
+                  boxShadow: "0 12px 60px rgba(60,30,140,0.55), 0 2px 20px rgba(0,0,0,0.70)",
+                }}
+              >
+                <CoverArt className="w-full h-auto rounded" />
+              </div>
+
+              {/* RIGHT — Book info */}
+              <div className="flex-1 min-w-0 md:pt-4">
                 <p
-                  className="font-sans text-[10px] tracking-[0.30em] uppercase mb-8 font-medium"
-                  style={{ color: "rgba(201,160,58,0.65)" }}
+                  className="font-sans text-[10px] tracking-[0.30em] uppercase mb-6 font-semibold"
+                  style={{ color: "rgba(201,160,58,0.62)" }}
                 >
                   Working Manuscript
                 </p>
 
                 <h1
-                  className="font-serif font-bold leading-tight tracking-tight mb-5"
+                  className="font-serif font-bold leading-tight tracking-tight mb-4"
                   style={{
-                    fontSize: "clamp(2.4rem, 5vw, 4rem)",
+                    fontSize: "clamp(2.2rem, 4.5vw, 3.6rem)",
                     color: "#f5f2ec",
                   }}
                 >
@@ -156,47 +240,53 @@ export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProp
                 </h1>
 
                 <p
-                  className="font-serif italic leading-relaxed mb-8"
+                  className="font-serif italic leading-relaxed mb-3"
                   style={{
-                    fontSize: "clamp(1.05rem, 2vw, 1.25rem)",
-                    color: "rgba(240,232,210,0.55)",
+                    fontSize: "clamp(1rem, 1.8vw, 1.2rem)",
+                    color: "rgba(240,232,210,0.52)",
                   }}
                 >
                   {book.subtitle}
                 </p>
 
+                {/* Ornamental divider */}
+                <div className="flex items-center gap-3 my-5" aria-hidden="true">
+                  <div className="flex-1 max-w-[80px] h-px" style={{ background: "rgba(201,160,58,0.22)" }} />
+                  <span style={{ color: "rgba(201,160,58,0.45)", fontSize: "8px" }}>◆</span>
+                  <div className="flex-1 max-w-[80px] h-px" style={{ background: "rgba(201,160,58,0.22)" }} />
+                </div>
+
                 <p
-                  className="font-sans leading-relaxed mb-12 max-w-lg"
-                  style={{
-                    fontSize: "0.92rem",
-                    color: "rgba(220,215,200,0.42)",
-                  }}
+                  className="font-sans leading-relaxed mb-10 max-w-lg"
+                  style={{ fontSize: "0.90rem", color: "rgba(220,215,200,0.40)" }}
                 >
                   A reader on ownership, finance, stewardship, and the recovery of an economy ordered toward life.
                 </p>
 
                 {/* CTA buttons */}
-                <div className="flex flex-wrap items-center gap-4">
+                <div className="flex flex-wrap items-center gap-3">
+                  {/* Primary — GOLD fill */}
                   <button
                     onClick={() => onOpenReading(book.chapters[0].slug)}
                     data-testid="button-start-reading"
-                    className="inline-flex items-center gap-2.5 px-6 py-3 font-sans font-semibold text-sm rounded transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                    className="inline-flex items-center gap-2 px-6 py-3 font-sans font-semibold text-sm rounded transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-400/50"
                     style={{
-                      background: "linear-gradient(135deg, #4a28c4 0%, #3a20a8 100%)",
-                      color: "#ffffff",
-                      boxShadow: "0 0 24px rgba(80,50,200,0.35), 0 2px 8px rgba(0,0,0,0.4)",
+                      background: "linear-gradient(135deg, #c9a03a 0%, #a87828 100%)",
+                      color: "#0a0810",
+                      boxShadow: "0 0 20px rgba(201,160,58,0.22), 0 2px 8px rgba(0,0,0,0.4)",
                     }}
                   >
                     Start with the Prologue
                     <ArrowRight size={14} />
                   </button>
 
+                  {/* Secondary — outlined */}
                   <button
                     onClick={scrollToTOC}
-                    className="inline-flex items-center gap-2 px-5 py-3 font-sans text-sm rounded transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                    className="inline-flex items-center gap-2 px-5 py-3 font-sans text-sm rounded transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/30"
                     style={{
                       border: "1px solid rgba(255,255,255,0.16)",
-                      color: "rgba(240,232,210,0.72)",
+                      color: "rgba(240,232,210,0.70)",
                       background: "rgba(255,255,255,0.04)",
                     }}
                   >
@@ -204,49 +294,39 @@ export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProp
                     <ArrowDown size={13} />
                   </button>
 
+                  {/* Continue */}
                   {continueChapter && continueChapter.slug !== book.chapters[0].slug && (
                     <button
                       onClick={() => onOpenReading(continueChapter.slug)}
                       className="inline-flex items-center gap-2 px-4 py-2.5 font-sans text-xs rounded transition-colors"
                       style={{
-                        color: "rgba(201,160,58,0.75)",
-                        border: "1px solid rgba(201,160,58,0.18)",
-                        background: "rgba(201,160,58,0.05)",
+                        color: "rgba(201,160,58,0.68)",
+                        border: "1px solid rgba(201,160,58,0.16)",
+                        background: "rgba(201,160,58,0.04)",
                       }}
                     >
-                      <span>Continue:</span>
-                      <span className="truncate max-w-[160px]">
+                      Continue: <span className="truncate max-w-[140px]">
                         {continueChapter.title.replace(/^Chapter \d+:\s*/, "")}
                       </span>
-                      <ArrowRight size={12} />
+                      <ArrowRight size={11} />
                     </button>
                   )}
                 </div>
-              </div>
-
-              {/* Right — cover art */}
-              <div
-                className="shrink-0 w-48 sm:w-56 md:w-64 lg:w-72 rounded-sm shadow-2xl"
-                style={{
-                  boxShadow: "0 8px 48px rgba(60,30,140,0.45), 0 2px 16px rgba(0,0,0,0.6)",
-                }}
-              >
-                <CoverArt className="w-full h-auto rounded-sm" />
               </div>
             </div>
           </div>
         </div>
 
         {/* Scroll cue */}
-        <div className="relative z-10 flex justify-center pb-10">
+        <div className="relative z-10 flex justify-center pb-8">
           <button
             onClick={scrollToTOC}
             aria-label="Scroll to Table of Contents"
-            className="flex flex-col items-center gap-2 transition-opacity hover:opacity-80 focus-visible:outline-none"
-            style={{ color: "rgba(201,160,58,0.4)" }}
+            className="flex flex-col items-center gap-2 transition-opacity hover:opacity-75 focus-visible:outline-none"
+            style={{ color: "rgba(201,160,58,0.35)" }}
           >
-            <span className="font-sans text-[10px] tracking-[0.25em] uppercase">Contents</span>
-            <ArrowDown size={14} className="animate-bounce" />
+            <span className="font-sans text-[10px] tracking-[0.28em] uppercase">Contents</span>
+            <ArrowDown size={13} className="animate-bounce" />
           </button>
         </div>
       </section>
@@ -255,38 +335,45 @@ export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProp
       <section
         ref={tocRef}
         id="toc-section"
-        className="nec-toc-bg flex-1 px-6 sm:px-8 lg:px-12 py-20 md:py-28"
+        className="nec-toc-bg px-5 sm:px-8 py-20 md:py-28"
         aria-label="Table of Contents"
       >
         <div className="max-w-4xl mx-auto">
 
           {/* Section header */}
-          <div className="mb-14">
-            <p
-              className="font-sans text-[10px] tracking-[0.30em] uppercase font-medium mb-4"
-              style={{ color: "rgba(201,160,58,0.55)" }}
-            >
-              Full Contents
-            </p>
+          <div className="flex items-end justify-between mb-4">
             <h2
-              className="font-serif font-bold leading-none tracking-tight"
-              style={{ fontSize: "clamp(1.6rem, 3.5vw, 2.4rem)", color: "#f0ede6" }}
+              className="font-sans font-bold uppercase tracking-[0.22em] text-sm"
+              style={{ color: "rgba(240,232,210,0.70)" }}
             >
               Table of Contents
             </h2>
+            <button
+              onClick={() => setExpandAll((e) => !e)}
+              className="font-sans text-[11px] flex items-center gap-1 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/25 rounded px-1"
+              style={{ color: "rgba(201,160,58,0.50)" }}
+            >
+              {expandAll ? "Collapse all ↑" : "Expand all ↓"}
+            </button>
+          </div>
+
+          {/* Gold ornamental divider */}
+          <div className="flex items-center gap-3 mb-10" aria-hidden="true">
             <div
-              className="mt-6 h-px"
-              style={{ background: "linear-gradient(90deg, rgba(201,160,58,0.3) 0%, rgba(201,160,58,0.06) 60%, transparent 100%)" }}
+              className="flex-1 h-px"
+              style={{ background: "linear-gradient(90deg, rgba(201,160,58,0.35) 0%, rgba(201,160,58,0.06) 70%, transparent 100%)" }}
             />
+            <span style={{ color: "rgba(201,160,58,0.45)", fontSize: "8px" }}>◆</span>
+            <div className="flex-1 max-w-[60px] h-px" style={{ background: "rgba(201,160,58,0.06)" }} />
           </div>
 
           {/* Chapter list */}
-          <ol className="space-y-1" role="list">
+          <ol className="space-y-[3px]" role="list">
             {book.chapters.map((chapter, idx) => {
               const label = chapterLabel(idx, book.chapters.length);
               const shortTitle = chapter.title.replace(/^Chapter \d+:\s*/, "");
               const sections = chapter.sections.filter((s) => s.title);
-              const isExpanded = expandedChapter === chapter.slug;
+              const isExpanded = isChapterExpanded(chapter.slug);
 
               return (
                 <li key={chapter.slug} role="listitem">
@@ -295,75 +382,70 @@ export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProp
                     style={{
                       border: "1px solid rgba(255,255,255,0.05)",
                       background: isExpanded
-                        ? "rgba(201,160,58,0.04)"
-                        : "rgba(255,255,255,0.02)",
+                        ? "rgba(201,160,58,0.03)"
+                        : "rgba(255,255,255,0.015)",
                     }}
                   >
-                    <div className="flex items-stretch">
-                      {/* Expand toggle */}
-                      {sections.length > 0 ? (
-                        <button
-                          onClick={() => toggleExpand(chapter.slug)}
-                          aria-expanded={isExpanded}
-                          aria-label={isExpanded ? "Collapse" : "Expand sections"}
-                          className="shrink-0 flex items-center justify-center w-10 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/20 rounded-l"
-                          style={{ color: isExpanded ? "rgba(201,160,58,0.6)" : "rgba(255,255,255,0.18)" }}
-                        >
-                          <ChevronRight
-                            size={13}
-                            className={`transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
-                          />
-                        </button>
-                      ) : (
-                        <span className="w-10 shrink-0" />
-                      )}
+                    <div className="flex items-center gap-3 px-3 py-0">
+                      {/* Badge */}
+                      <div className="shrink-0 py-3">
+                        {chapterBadge(idx, book.chapters.length)}
+                      </div>
 
-                      {/* Main chapter row */}
+                      {/* Label + title */}
                       <button
                         onClick={() => onOpenReading(chapter.slug)}
                         data-testid={`home-chapter-${chapter.slug}`}
-                        className="flex-1 flex items-center justify-between gap-4 px-3 py-4 text-left group focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/25 rounded-r transition-all"
+                        className="flex-1 flex flex-col gap-[2px] py-3 text-left group focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/20 rounded min-w-0"
                       >
-                        <div className="flex items-baseline gap-4 min-w-0">
-                          {/* Chapter label */}
-                          <span
-                            className="shrink-0 font-sans text-[10px] tracking-[0.18em] uppercase font-medium w-14 text-right"
-                            style={{ color: "rgba(201,160,58,0.55)" }}
-                          >
-                            {label}
-                          </span>
-                          {/* Chapter title */}
-                          <span
-                            className="font-serif text-[0.98rem] leading-snug group-hover:text-white transition-colors"
-                            style={{ color: "rgba(240,232,210,0.82)" }}
-                          >
-                            {shortTitle}
-                          </span>
-                        </div>
+                        <span
+                          className="text-[9px] font-sans uppercase tracking-[0.22em] font-semibold"
+                          style={{ color: "rgba(201,160,58,0.52)" }}
+                        >
+                          {label}
+                        </span>
+                        <span
+                          className="font-serif text-[0.93rem] leading-snug group-hover:text-white transition-colors"
+                          style={{ color: "rgba(240,232,210,0.82)" }}
+                        >
+                          {shortTitle}
+                        </span>
+                      </button>
 
-                        <div className="shrink-0 flex items-center gap-3">
-                          {sections.length > 0 && (
-                            <span
-                              className="font-sans text-[10px] hidden sm:block"
-                              style={{ color: "rgba(255,255,255,0.20)" }}
-                            >
-                              {sections.length} sections
-                            </span>
-                          )}
-                          <ArrowRight
-                            size={13}
-                            className="transition-all group-hover:translate-x-0.5"
-                            style={{ color: "rgba(201,160,58,0.30)" }}
-                          />
-                        </div>
+                      {/* Section count */}
+                      {sections.length > 0 && (
+                        <span
+                          className="shrink-0 font-sans text-[10px] hidden sm:block tabular-nums"
+                          style={{ color: "rgba(255,255,255,0.20)" }}
+                        >
+                          {sections.length} sections
+                        </span>
+                      )}
+
+                      {/* Expand/arrow */}
+                      <button
+                        onClick={() => sections.length > 0 ? toggleExpand(chapter.slug) : onOpenReading(chapter.slug)}
+                        aria-expanded={sections.length > 0 ? isExpanded : undefined}
+                        className="shrink-0 p-2 rounded transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/20"
+                        style={{ color: "rgba(201,160,58,0.30)" }}
+                        aria-label={
+                          sections.length > 0
+                            ? isExpanded ? "Collapse" : "Expand sections"
+                            : `Open ${shortTitle}`
+                        }
+                      >
+                        <ChevronRight
+                          size={13}
+                          className={`transition-transform duration-200 ${isExpanded && sections.length > 0 ? "rotate-90" : ""}`}
+                        />
                       </button>
                     </div>
 
                     {/* Expanded sections */}
                     {isExpanded && sections.length > 0 && (
                       <div
-                        className="pb-2 pt-1 mx-10"
-                        style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
+                        className="pb-2 px-3 ml-[52px]"
+                        style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}
                       >
                         <ol className="space-y-0" role="list">
                           {sections.map((section) => (
@@ -371,14 +453,14 @@ export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProp
                               <button
                                 onClick={() => onOpenReading(chapter.slug, section.slug)}
                                 data-testid={`home-section-${section.slug}`}
-                                className="w-full text-left px-3 py-2 text-[0.79rem] font-sans rounded transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/20 flex items-center gap-2 group"
-                                style={{ color: "rgba(220,210,188,0.48)" }}
+                                className="w-full text-left px-2 py-[6px] text-[0.76rem] font-sans rounded transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/15 flex items-center gap-2 group"
+                                style={{ color: "rgba(220,210,188,0.40)" }}
                               >
                                 <span
-                                  className="w-1 h-1 rounded-full shrink-0"
-                                  style={{ background: "rgba(201,160,58,0.35)" }}
+                                  className="w-[3px] h-[3px] rounded-full shrink-0"
+                                  style={{ background: "rgba(201,160,58,0.30)" }}
                                 />
-                                <span className="flex-1 leading-snug group-hover:text-white/70 transition-colors">
+                                <span className="flex-1 leading-snug group-hover:text-white/65 transition-colors">
                                   {section.title}
                                 </span>
                               </button>
@@ -392,17 +474,29 @@ export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProp
               );
             })}
           </ol>
+
+          {/* Bottom link */}
+          <div className="mt-6 pt-6" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+            <button
+              onClick={() => onOpenReading(book.chapters[book.chapters.length - 2]?.slug ?? book.chapters[0].slug)}
+              className="flex items-center gap-1.5 font-sans text-[12px] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/25 rounded"
+              style={{ color: "rgba(201,160,58,0.45)" }}
+            >
+              Continue through all {book.chapters.length - 2} chapters and Conclusion
+              <ArrowRight size={12} />
+            </button>
+          </div>
         </div>
       </section>
 
       {/* ── Footer ──────────────────────────────────────────────────────── */}
       <footer
-        className="px-6 sm:px-8 lg:px-12 py-10"
-        style={{ background: "#030410", borderTop: "1px solid rgba(255,255,255,0.06)" }}
+        className="px-5 sm:px-8 py-8"
+        style={{ background: "#030410", borderTop: "1px solid rgba(255,255,255,0.05)" }}
       >
         <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-4">
           <NecLogo size="sm" />
-          <p className="font-sans text-xs" style={{ color: "rgba(220,210,188,0.25)" }}>
+          <p className="font-sans text-xs" style={{ color: "rgba(220,210,188,0.20)" }}>
             <span className="font-serif italic">{book.title}</span> — Working manuscript
           </p>
         </div>
