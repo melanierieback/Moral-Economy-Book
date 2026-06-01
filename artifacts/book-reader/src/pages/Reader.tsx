@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Menu, X, BookOpen, Sun, Moon, ArrowLeft, ChevronRight, ChevronLeft } from "lucide-react";
+import { Menu, X, Sun, Moon, ArrowLeft, ChevronRight, ChevronLeft } from "lucide-react";
 import { book } from "../lib/book";
 import { TOC } from "../components/TOC";
 import { ChapterView } from "../components/ChapterView";
 import { Search } from "../components/Search";
+import { NecLogo } from "../components/NecLogo";
 
 interface ReaderProps {
   initialChapterSlug: string;
@@ -12,9 +13,6 @@ interface ReaderProps {
   darkMode: boolean;
   onToggleDark: () => void;
 }
-
-// All slugs for scrollspy
-const ALL_CHAPTER_SLUGS = book.chapters.map((c) => c.slug);
 
 function useSectionScrollspy(chapterSlug: string) {
   const chapter = book.chapters.find((c) => c.slug === chapterSlug);
@@ -27,7 +25,6 @@ function useSectionScrollspy(chapterSlug: string) {
 
   useEffect(() => {
     setActiveSlug(chapterSlug);
-    const observers: IntersectionObserver[] = [];
     const visibleMap = new Map<string, number>();
 
     const updateActive = () => {
@@ -45,6 +42,7 @@ function useSectionScrollspy(chapterSlug: string) {
       if (best) setActiveSlug(best);
     };
 
+    const observers: IntersectionObserver[] = [];
     for (const slug of allSlugs) {
       const el = document.getElementById(slug);
       if (!el) continue;
@@ -54,11 +52,7 @@ function useSectionScrollspy(chapterSlug: string) {
             if (entry.isIntersecting) {
               visibleMap.set(slug, entry.boundingClientRect.top);
             } else {
-              if (entry.boundingClientRect.top < 0) {
-                visibleMap.set(slug, entry.boundingClientRect.top);
-              } else {
-                visibleMap.delete(slug);
-              }
+              visibleMap.set(slug, entry.boundingClientRect.top);
             }
             updateActive();
           }
@@ -101,18 +95,15 @@ export function Reader({ initialChapterSlug, initialSectionSlug, onGoHome, darkM
   const activeSlug = useSectionScrollspy(currentChapterSlug);
   const scrollProgress = useScrollProgress();
 
-  // Save last-read chapter
   useEffect(() => {
     try { localStorage.setItem("nec-last-chapter", currentChapterSlug); } catch { /* ignore */ }
   }, [currentChapterSlug]);
 
-  // Scroll to top on chapter change (except initial mount)
   useEffect(() => {
     if (!didMount.current) { didMount.current = true; return; }
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [currentChapterSlug]);
 
-  // Scroll to initial section slug on first render
   useEffect(() => {
     if (!initialSectionSlug) return;
     const attempt = (tries: number) => {
@@ -127,16 +118,12 @@ export function Reader({ initialChapterSlug, initialSectionSlug, onGoHome, darkM
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Update URL hash on scroll
   useEffect(() => {
     if (!activeSlug) return;
-    const id = setTimeout(() => {
-      history.replaceState(null, "", `#${activeSlug}`);
-    }, 200);
+    const id = setTimeout(() => { history.replaceState(null, "", `#${activeSlug}`); }, 200);
     return () => clearTimeout(id);
   }, [activeSlug]);
 
-  // Lock body when drawer open
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
@@ -154,10 +141,7 @@ export function Reader({ initialChapterSlug, initialSectionSlug, onGoHome, darkM
     setMobileOpen(false);
   }, []);
 
-  // Active chapter slug for TOC (always the current chapter)
   const activeTocSlug = activeSlug || currentChapterSlug;
-
-  // Progress for TOC: 0–1 within this chapter's sections
   const chapter = currentChapter;
   const sectionSlugs = chapter ? chapter.sections.filter((s) => s.title).map((s) => s.slug) : [];
   const activeSecIdx = sectionSlugs.indexOf(activeSlug);
@@ -165,76 +149,107 @@ export function Reader({ initialChapterSlug, initialSectionSlug, onGoHome, darkM
     ? Math.max(0, activeSecIdx) / sectionSlugs.length + scrollProgress / sectionSlugs.length
     : scrollProgress;
 
-  // Breadcrumb section title
   const activeSection = chapter?.sections.find((s) => s.slug === activeSlug);
   const chapterShortTitle = currentChapter?.title.replace(/^Chapter \d+:\s*/, "") ?? "";
 
+  const handleSearchNavigate = useCallback((slug: string) => {
+    const ch = book.chapters.find(c => c.slug === slug || c.sections.some(s => s.slug === slug));
+    if (ch) { goToChapter(ch.slug); setTimeout(() => scrollToSection(slug), 200); }
+  }, [goToChapter, scrollToSection]);
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* ── Mobile header ─────────────────────────────────────────── */}
-      <header className="lg:hidden sticky top-0 z-40 bg-sidebar border-b border-sidebar-border flex items-center px-4 h-14 gap-2 shadow-sm">
-        {/* Back to contents */}
-        <button
-          onClick={onGoHome}
-          data-testid="button-back-home"
-          aria-label="Back to Table of Contents"
-          className="shrink-0 flex items-center gap-1.5 text-sidebar-foreground/70 hover:text-sidebar-primary transition-colors text-xs font-sans px-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sidebar-primary rounded"
-        >
-          <ArrowLeft size={14} />
-          <span className="hidden sm:inline">Contents</span>
-        </button>
 
-        <div className="flex-1 flex items-center gap-2 min-w-0 pl-1">
-          <span className="text-sidebar-foreground/60 text-xs font-sans truncate">
-            {chapterShortTitle}
-          </span>
+      {/* ── Mobile header ─────────────────────────────────────────────── */}
+      <header className="lg:hidden sticky top-0 z-40 nec-reading-header">
+        <div className="flex items-center px-4 h-14 gap-3">
+          {/* Back to contents */}
+          <button
+            onClick={onGoHome}
+            data-testid="button-back-home"
+            aria-label="Back to Table of Contents"
+            className="shrink-0 flex items-center gap-1.5 transition-colors text-xs font-sans font-medium px-1 py-1 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30"
+            style={{ color: "rgba(201,160,58,0.75)" }}
+          >
+            <ArrowLeft size={14} />
+            <span className="hidden sm:inline">Contents</span>
+          </button>
+
+          {/* Breadcrumb */}
+          <div className="flex-1 min-w-0 px-1">
+            <span className="font-sans text-xs truncate" style={{ color: "rgba(240,232,210,0.4)" }}>
+              {chapterShortTitle}
+            </span>
+          </div>
+
+          {/* Controls */}
+          <div className="flex items-center gap-1 shrink-0">
+            <Search onNavigate={handleSearchNavigate} />
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="transition-colors p-1.5 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30"
+              data-testid="button-open-toc"
+              aria-label="Open chapter outline"
+              aria-expanded={mobileOpen}
+              style={{ color: "rgba(240,232,210,0.55)" }}
+            >
+              <Menu size={17} />
+            </button>
+            <button
+              onClick={onToggleDark}
+              className="transition-colors p-1.5 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30"
+              aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+              style={{ color: "rgba(240,232,210,0.45)" }}
+            >
+              {darkMode ? <Sun size={15} /> : <Moon size={15} />}
+            </button>
+          </div>
         </div>
 
-        <div className="flex items-center gap-1.5 shrink-0">
-          <Search onNavigate={(slug) => {
-            const ch = book.chapters.find(c => c.slug === slug || c.sections.some(s => s.slug === slug));
-            if (ch) { goToChapter(ch.slug); setTimeout(() => scrollToSection(slug), 200); }
-          }} />
-          <button
-            onClick={() => setMobileOpen(true)}
-            className="text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors p-1 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-sidebar-primary"
-            data-testid="button-open-toc"
-            aria-label="Open chapter outline"
-            aria-expanded={mobileOpen}
-          >
-            <Menu size={18} />
-          </button>
-          <button
-            onClick={onToggleDark}
-            className="text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors p-1 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-sidebar-primary"
-            aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-          >
-            {darkMode ? <Sun size={15} /> : <Moon size={15} />}
-          </button>
+        {/* Reading progress bar */}
+        <div className="h-px w-full" style={{ background: "rgba(255,255,255,0.06)" }}>
+          <div
+            className="h-full transition-all duration-300"
+            style={{
+              width: `${Math.round(scrollProgress * 100)}%`,
+              background: "linear-gradient(90deg, rgba(201,160,58,0.6), rgba(201,160,58,0.3))",
+            }}
+          />
         </div>
       </header>
 
-      {/* ── Mobile drawer ─────────────────────────────────────────── */}
+      {/* ── Mobile drawer ─────────────────────────────────────────────── */}
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex" role="dialog" aria-modal="true" aria-label="Chapter outline">
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <div className="relative flex flex-col w-72 max-w-[85vw] bg-sidebar shadow-2xl">
-            <div className="flex items-center justify-between px-4 h-14 border-b border-sidebar-border shrink-0">
+          <div
+            className="fixed inset-0 backdrop-blur-sm"
+            style={{ background: "rgba(4,5,16,0.75)" }}
+            onClick={() => setMobileOpen(false)}
+          />
+          <div className="relative flex flex-col w-72 max-w-[85vw] shadow-2xl" style={{ background: "#070919" }}>
+            {/* Drawer header */}
+            <div
+              className="flex items-center justify-between px-4 h-14 shrink-0"
+              style={{ borderBottom: "1px solid rgba(201,160,58,0.12)" }}
+            >
               <button
                 onClick={onGoHome}
-                className="flex items-center gap-2 text-sidebar-primary hover:text-sidebar-primary/80 transition-colors text-sm font-sans font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-sidebar-primary rounded"
+                className="flex items-center gap-2 text-sm font-sans font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30 rounded"
+                style={{ color: "rgba(201,160,58,0.75)" }}
               >
                 <ArrowLeft size={14} />
                 Table of Contents
               </button>
               <button
                 onClick={() => setMobileOpen(false)}
-                className="text-sidebar-foreground/60 hover:text-sidebar-foreground transition-colors p-1 rounded"
+                className="transition-colors p-1 rounded"
                 aria-label="Close"
+                style={{ color: "rgba(240,232,210,0.45)" }}
               >
                 <X size={18} />
               </button>
             </div>
+            {/* TOC */}
             <div className="flex-1 overflow-hidden">
               <TOC
                 activeSlug={activeTocSlug}
@@ -254,44 +269,48 @@ export function Reader({ initialChapterSlug, initialSectionSlug, onGoHome, darkM
       )}
 
       <div className="flex flex-1 relative">
-        {/* ── Desktop sidebar ──────────────────────────────────────── */}
+
+        {/* ── Desktop sidebar ──────────────────────────────────────────── */}
         <aside
-          className="hidden lg:flex flex-col fixed top-0 left-0 h-screen w-64 xl:w-72 bg-sidebar border-r border-sidebar-border z-30"
+          className="hidden lg:flex flex-col fixed top-0 left-0 h-screen w-64 xl:w-72 z-30"
+          style={{
+            background: "#060718",
+            borderRight: "1px solid rgba(201,160,58,0.10)",
+          }}
           aria-label="Chapter navigation"
         >
           {/* Sidebar header */}
-          <div className="shrink-0 px-5 py-4 border-b border-sidebar-border">
-            <div className="flex items-center justify-between mb-3">
-              {/* Back to contents */}
+          <div
+            className="shrink-0 px-5 py-4"
+            style={{ borderBottom: "1px solid rgba(201,160,58,0.08)" }}
+          >
+            {/* Top row: back button + controls */}
+            <div className="flex items-center justify-between mb-4">
               <button
                 onClick={onGoHome}
                 data-testid="button-back-home-desktop"
-                className="flex items-center gap-1.5 text-sidebar-primary/80 hover:text-sidebar-primary transition-colors text-[11px] font-sans font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-sidebar-primary rounded"
+                className="flex items-center gap-1.5 text-[11px] font-sans font-semibold tracking-wide transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30 rounded"
+                style={{ color: "rgba(201,160,58,0.72)" }}
               >
                 <ArrowLeft size={12} />
                 <span>Contents</span>
               </button>
               <div className="flex items-center gap-2.5">
-                <Search onNavigate={(slug) => {
-                  const ch = book.chapters.find(c => c.slug === slug || c.sections.some(s => s.slug === slug));
-                  if (ch) { goToChapter(ch.slug); setTimeout(() => scrollToSection(slug), 200); }
-                }} />
+                <Search onNavigate={handleSearchNavigate} />
                 <button
                   onClick={onToggleDark}
-                  className="text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors p-0.5 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-sidebar-primary"
+                  className="transition-colors p-0.5 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30"
                   aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
                   data-testid="button-toggle-dark"
+                  style={{ color: "rgba(240,232,210,0.35)" }}
                 >
                   {darkMode ? <Sun size={13} /> : <Moon size={13} />}
                 </button>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <BookOpen size={13} className="text-sidebar-primary shrink-0" />
-              <span className="text-sidebar-foreground/35 text-[10.5px] font-sans truncate">
-                Non-Extractive Capital
-              </span>
-            </div>
+
+            {/* Brand */}
+            <NecLogo size="sm" />
           </div>
 
           {/* TOC */}
@@ -311,16 +330,38 @@ export function Reader({ initialChapterSlug, initialSectionSlug, onGoHome, darkM
           </div>
 
           {/* Sidebar footer */}
-          <div className="shrink-0 px-5 py-3 border-t border-sidebar-border">
-            <p className="text-[10px] text-sidebar-foreground/25 font-sans">Working manuscript</p>
+          <div
+            className="shrink-0 px-5 py-3"
+            style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
+          >
+            <p className="font-sans text-[10px]" style={{ color: "rgba(240,232,210,0.18)" }}>
+              Working manuscript
+            </p>
           </div>
         </aside>
 
-        {/* ── Main content ─────────────────────────────────────────── */}
-        <main className="flex-1 lg:ml-64 xl:ml-72 min-h-screen" id="main-content">
+        {/* ── Main reading content ─────────────────────────────────────── */}
+        <main
+          className="flex-1 lg:ml-64 xl:ml-72 min-h-screen bg-background"
+          id="main-content"
+        >
+          {/* Desktop reading progress bar */}
+          <div
+            className="hidden lg:block sticky top-0 z-10 h-0.5 w-full"
+            style={{ background: "rgba(201,160,58,0.08)" }}
+          >
+            <div
+              className="h-full transition-all duration-300"
+              style={{
+                width: `${Math.round(scrollProgress * 100)}%`,
+                background: "linear-gradient(90deg, rgba(201,160,58,0.55), rgba(201,160,58,0.22))",
+              }}
+            />
+          </div>
+
           {/* Breadcrumb */}
-          <div className="px-5 sm:px-8 md:px-12 lg:px-16 pt-8 pb-0">
-            <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-[11px] font-sans text-muted-foreground/50 flex-wrap">
+          <div className="px-6 sm:px-8 md:px-12 lg:px-16 pt-8 pb-0">
+            <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-[11px] font-sans flex-wrap" style={{ color: "rgba(0,0,0,0.35)" }}>
               <button
                 onClick={onGoHome}
                 className="hover:text-primary transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring rounded"
@@ -328,20 +369,22 @@ export function Reader({ initialChapterSlug, initialSectionSlug, onGoHome, darkM
                 Contents
               </button>
               <ChevronRight size={10} className="opacity-40 shrink-0" />
-              <span className="text-muted-foreground/70 truncate max-w-[200px]">
+              <span className="truncate max-w-[200px]" style={{ color: "rgba(0,0,0,0.55)" }}>
                 {chapterShortTitle}
               </span>
               {activeSection && (
                 <>
                   <ChevronRight size={10} className="opacity-40 shrink-0" />
-                  <span className="truncate max-w-[200px]">{activeSection.title}</span>
+                  <span className="truncate max-w-[200px]" style={{ color: "rgba(0,0,0,0.38)" }}>
+                    {activeSection.title}
+                  </span>
                 </>
               )}
             </nav>
           </div>
 
           {/* Chapter content */}
-          <div className="px-5 sm:px-8 md:px-12 lg:px-16 py-10 md:py-14 max-w-[820px]">
+          <div className="px-6 sm:px-8 md:px-12 lg:px-16 py-10 md:py-14 max-w-[820px]">
             {currentChapter && (
               <ChapterView
                 chapter={currentChapter}
@@ -353,8 +396,8 @@ export function Reader({ initialChapterSlug, initialSectionSlug, onGoHome, darkM
             )}
           </div>
 
-          {/* Chapter prev/next bottom nav (larger touch targets) */}
-          <div className="px-5 sm:px-8 md:px-12 lg:px-16 pb-16 max-w-[820px]">
+          {/* Bottom prev/next */}
+          <div className="px-6 sm:px-8 md:px-12 lg:px-16 pb-16 max-w-[820px]">
             <div className="flex items-center justify-between gap-4 pt-2">
               {prevChapter ? (
                 <button
@@ -398,7 +441,7 @@ export function Reader({ initialChapterSlug, initialSectionSlug, onGoHome, darkM
           </div>
 
           {/* Footer */}
-          <footer className="px-5 sm:px-8 md:px-12 lg:px-16 py-8 border-t border-border">
+          <footer className="px-6 sm:px-8 md:px-12 lg:px-16 py-8 border-t border-border">
             <div className="max-w-[820px]">
               <p className="text-xs text-muted-foreground/50 font-sans">
                 <span className="font-serif italic">{book.title}</span> &mdash; {book.subtitle}.{" "}

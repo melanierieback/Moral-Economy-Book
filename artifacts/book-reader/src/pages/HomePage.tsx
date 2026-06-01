@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
-import { ChevronRight, BookOpen, ArrowRight, Sun, Moon } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ChevronRight, ArrowRight, ArrowDown, Sun, Moon, Search as SearchIcon } from "lucide-react";
 import { book } from "../lib/book";
 import { CoverArt } from "../components/CoverArt";
+import { NecLogo } from "../components/NecLogo";
 import { Search } from "../components/Search";
 
 interface HomePageProps {
@@ -13,12 +14,68 @@ interface HomePageProps {
 function chapterLabel(idx: number, total: number): string {
   if (idx === 0) return "Prologue";
   if (idx === total - 1) return "Conclusion";
-  return `Chapter ${idx}`;
+  return `Ch. ${idx}`;
+}
+
+function StarburstDecor() {
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+      {/* Main starburst glow blob */}
+      <div
+        className="absolute nec-starburst-outer"
+        style={{
+          top: "5%",
+          left: "30%",
+          width: "70%",
+          height: "90%",
+          transform: "translate(-20%, 0)",
+        }}
+      />
+      {/* Rays — SVG overlay */}
+      <svg
+        className="absolute inset-0 w-full h-full"
+        viewBox="0 0 1280 800"
+        preserveAspectRatio="xMidYMid slice"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <linearGradient id="homeRayL" x1="560" y1="260" x2="80" y2="780" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#f5e8c0" stopOpacity="0.22" />
+            <stop offset="100%" stopColor="#c49030" stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id="homeRayR" x1="560" y1="260" x2="1050" y2="780" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#f0dca0" stopOpacity="0.15" />
+            <stop offset="100%" stopColor="#b08020" stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id="homeRayUR" x1="560" y1="260" x2="1280" y2="20" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#f0e0b0" stopOpacity="0.10" />
+            <stop offset="100%" stopColor="#d4a040" stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id="homeRayUL" x1="560" y1="260" x2="0" y2="80" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#e8d8a0" stopOpacity="0.08" />
+            <stop offset="100%" stopColor="#c09028" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        {/* Diagonal rays from the starburst origin */}
+        <line x1="560" y1="260" x2="80" y2="790" stroke="url(#homeRayL)" strokeWidth="1.5" />
+        <line x1="560" y1="260" x2="1060" y2="790" stroke="url(#homeRayR)" strokeWidth="1" />
+        <line x1="560" y1="260" x2="1280" y2="18" stroke="url(#homeRayUR)" strokeWidth="0.8" />
+        <line x1="560" y1="260" x2="0" y2="75" stroke="url(#homeRayUL)" strokeWidth="0.6" />
+        {/* Horizontal faint cross */}
+        <line x1="0" y1="262" x2="1280" y2="258" stroke="#d4a040" strokeWidth="0.3" strokeOpacity="0.06" />
+        {/* Bright core */}
+        <circle cx="560" cy="260" r="4" fill="#f9f5e0" fillOpacity="0.35" />
+        <circle cx="560" cy="260" r="12" fill="#e8c870" fillOpacity="0.08" />
+        <circle cx="560" cy="260" r="30" fill="#7040c0" fillOpacity="0.06" />
+      </svg>
+    </div>
+  );
 }
 
 export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProps) {
   const [expandedChapter, setExpandedChapter] = useState<string | null>(null);
   const [continueSlug, setContinueSlug] = useState<string | null>(null);
+  const tocRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     try {
@@ -39,182 +96,313 @@ export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProp
     setExpandedChapter((prev) => (prev === slug ? null : slug));
   };
 
+  const scrollToTOC = () => {
+    tocRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const handleSearchNavigate = (slug: string) => {
+    const ch = book.chapters.find(
+      (c) => c.slug === slug || c.sections.some((s) => s.slug === slug)
+    );
+    if (ch) onOpenReading(ch.slug, ch.slug !== slug ? slug : undefined);
+  };
+
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
-      {/* ── Site header ──────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-40 bg-primary text-primary-foreground border-b border-primary-foreground/10 shadow-sm">
-        <div className="max-w-6xl mx-auto px-5 sm:px-8 h-14 flex items-center justify-between gap-4">
-          {/* Brand */}
-          <div className="flex items-center gap-2.5 min-w-0">
-            <BookOpen size={15} className="shrink-0 text-sidebar-primary" />
-            <span className="font-sans font-semibold text-sm tracking-wide truncate">
-              Non-Extractive Capital
-            </span>
-          </div>
-          {/* Controls */}
-          <div className="flex items-center gap-3 shrink-0">
-            <Search onNavigate={(slug) => onOpenReading(
-              book.chapters.find(ch => ch.slug === slug || ch.sections.some(s => s.slug === slug))?.slug ?? slug,
-              slug
-            )} />
-            <button
-              onClick={onToggleDark}
-              aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-              className="text-primary-foreground/60 hover:text-primary-foreground transition-colors p-0.5 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-foreground"
-            >
-              {darkMode ? <Sun size={15} /> : <Moon size={15} />}
-            </button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#04050f", color: "#f0ede6" }}>
 
-      {/* ── Cover panel ─────────────────────────────────────────────── */}
-      <section className="bg-primary text-primary-foreground">
-        <div className="max-w-6xl mx-auto px-5 sm:px-8 py-12 md:py-16 lg:py-20 flex flex-col md:flex-row items-center gap-10 md:gap-14 lg:gap-20">
-          {/* Cover art */}
-          <div className="shrink-0 w-48 sm:w-56 md:w-60 lg:w-72 opacity-90">
-            <CoverArt className="w-full h-auto rounded shadow-2xl" />
-          </div>
+      {/* ── HERO SECTION ──────────────────────────────────────────────── */}
+      <section className="nec-hero relative min-h-screen flex flex-col">
+        <StarburstDecor />
 
-          {/* Book info */}
-          <div className="flex-1 min-w-0 text-center md:text-left">
-            <p className="text-[11px] uppercase tracking-[0.25em] font-sans opacity-45 mb-4">
-              Working manuscript
-            </p>
-            <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight tracking-tight mb-4 break-words">
-              {book.title}
-            </h1>
-            <p className="font-serif text-lg sm:text-xl opacity-65 italic leading-relaxed mb-6">
-              {book.subtitle}
-            </p>
-            <p className="font-sans text-[0.88rem] opacity-55 leading-relaxed max-w-lg mx-auto md:mx-0 mb-8">
-              A reader on ownership, finance, stewardship, and the recovery of an economy ordered toward life.
-            </p>
-
-            {/* CTA buttons */}
-            <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start">
+        {/* Header */}
+        <header className="relative z-20 nec-header">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 h-16 flex items-center justify-between gap-4">
+            <NecLogo size="sm" />
+            <div className="flex items-center gap-3">
+              <Search onNavigate={handleSearchNavigate} />
               <button
-                onClick={() => onOpenReading(book.chapters[0].slug)}
-                data-testid="button-start-reading"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-sidebar-primary text-sidebar-primary-foreground font-sans font-semibold text-sm rounded hover:opacity-90 active:opacity-80 transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-sidebar-primary focus-visible:outline-offset-2"
+                onClick={onToggleDark}
+                aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+                className="text-white/40 hover:text-white/80 transition-colors p-1 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/40"
               >
-                Start with the Prologue
-                <ArrowRight size={14} />
+                {darkMode ? <Sun size={15} /> : <Moon size={15} />}
               </button>
-              {continueChapter && continueChapter.slug !== book.chapters[0].slug && (
-                <button
-                  onClick={() => onOpenReading(continueChapter.slug)}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 border border-primary-foreground/25 hover:border-primary-foreground/50 text-primary-foreground/70 hover:text-primary-foreground font-sans text-sm rounded transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-foreground"
+            </div>
+          </div>
+        </header>
+
+        {/* Hero body */}
+        <div className="relative z-10 flex flex-1 items-center">
+          <div className="max-w-7xl mx-auto w-full px-6 sm:px-8 lg:px-12 py-16 md:py-24">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-12 lg:gap-20">
+
+              {/* Left — book info */}
+              <div className="flex-1 min-w-0 max-w-2xl md:pt-6">
+                <p
+                  className="font-sans text-[10px] tracking-[0.30em] uppercase mb-8 font-medium"
+                  style={{ color: "rgba(201,160,58,0.65)" }}
                 >
-                  Continue reading
-                  <span className="truncate max-w-[14rem] opacity-70 text-xs">
-                    {continueChapter.title.replace(/^Chapter \d+:\s*/, "")}
-                  </span>
-                  <ArrowRight size={13} />
-                </button>
-              )}
+                  Working Manuscript
+                </p>
+
+                <h1
+                  className="font-serif font-bold leading-tight tracking-tight mb-5"
+                  style={{
+                    fontSize: "clamp(2.4rem, 5vw, 4rem)",
+                    color: "#f5f2ec",
+                  }}
+                >
+                  {book.title}
+                </h1>
+
+                <p
+                  className="font-serif italic leading-relaxed mb-8"
+                  style={{
+                    fontSize: "clamp(1.05rem, 2vw, 1.25rem)",
+                    color: "rgba(240,232,210,0.55)",
+                  }}
+                >
+                  {book.subtitle}
+                </p>
+
+                <p
+                  className="font-sans leading-relaxed mb-12 max-w-lg"
+                  style={{
+                    fontSize: "0.92rem",
+                    color: "rgba(220,215,200,0.42)",
+                  }}
+                >
+                  A reader on ownership, finance, stewardship, and the recovery of an economy ordered toward life.
+                </p>
+
+                {/* CTA buttons */}
+                <div className="flex flex-wrap items-center gap-4">
+                  <button
+                    onClick={() => onOpenReading(book.chapters[0].slug)}
+                    data-testid="button-start-reading"
+                    className="inline-flex items-center gap-2.5 px-6 py-3 font-sans font-semibold text-sm rounded transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                    style={{
+                      background: "linear-gradient(135deg, #4a28c4 0%, #3a20a8 100%)",
+                      color: "#ffffff",
+                      boxShadow: "0 0 24px rgba(80,50,200,0.35), 0 2px 8px rgba(0,0,0,0.4)",
+                    }}
+                  >
+                    Start with the Prologue
+                    <ArrowRight size={14} />
+                  </button>
+
+                  <button
+                    onClick={scrollToTOC}
+                    className="inline-flex items-center gap-2 px-5 py-3 font-sans text-sm rounded transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                    style={{
+                      border: "1px solid rgba(255,255,255,0.16)",
+                      color: "rgba(240,232,210,0.72)",
+                      background: "rgba(255,255,255,0.04)",
+                    }}
+                  >
+                    View Table of Contents
+                    <ArrowDown size={13} />
+                  </button>
+
+                  {continueChapter && continueChapter.slug !== book.chapters[0].slug && (
+                    <button
+                      onClick={() => onOpenReading(continueChapter.slug)}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 font-sans text-xs rounded transition-colors"
+                      style={{
+                        color: "rgba(201,160,58,0.75)",
+                        border: "1px solid rgba(201,160,58,0.18)",
+                        background: "rgba(201,160,58,0.05)",
+                      }}
+                    >
+                      <span>Continue:</span>
+                      <span className="truncate max-w-[160px]">
+                        {continueChapter.title.replace(/^Chapter \d+:\s*/, "")}
+                      </span>
+                      <ArrowRight size={12} />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Right — cover art */}
+              <div
+                className="shrink-0 w-48 sm:w-56 md:w-64 lg:w-72 rounded-sm shadow-2xl"
+                style={{
+                  boxShadow: "0 8px 48px rgba(60,30,140,0.45), 0 2px 16px rgba(0,0,0,0.6)",
+                }}
+              >
+                <CoverArt className="w-full h-auto rounded-sm" />
+              </div>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* ── Table of Contents ────────────────────────────────────────── */}
-      <section className="flex-1 max-w-6xl mx-auto w-full px-5 sm:px-8 py-12 md:py-16">
-        <div className="mb-8">
-          <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground tracking-tight mb-1">
-            Table of Contents
-          </h2>
-          <div className="h-px bg-border mt-4" />
+        {/* Scroll cue */}
+        <div className="relative z-10 flex justify-center pb-10">
+          <button
+            onClick={scrollToTOC}
+            aria-label="Scroll to Table of Contents"
+            className="flex flex-col items-center gap-2 transition-opacity hover:opacity-80 focus-visible:outline-none"
+            style={{ color: "rgba(201,160,58,0.4)" }}
+          >
+            <span className="font-sans text-[10px] tracking-[0.25em] uppercase">Contents</span>
+            <ArrowDown size={14} className="animate-bounce" />
+          </button>
         </div>
-
-        <ol className="space-y-1" role="list">
-          {book.chapters.map((chapter, idx) => {
-            const label = chapterLabel(idx, book.chapters.length);
-            const shortTitle = chapter.title.replace(/^Chapter \d+:\s*/, "");
-            const sections = chapter.sections.filter((s) => s.title);
-            const isExpanded = expandedChapter === chapter.slug;
-
-            return (
-              <li key={chapter.slug} role="listitem" className="group">
-                <div className="flex items-stretch rounded-lg hover:bg-muted/40 transition-colors">
-                  {/* Expand toggle */}
-                  {sections.length > 0 ? (
-                    <button
-                      onClick={() => toggleExpand(chapter.slug)}
-                      aria-expanded={isExpanded}
-                      aria-label={isExpanded ? "Collapse sections" : "Expand sections"}
-                      className="shrink-0 flex items-center justify-center w-10 text-muted-foreground/40 hover:text-muted-foreground transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-1 rounded-l-lg"
-                    >
-                      <ChevronRight
-                        size={14}
-                        className={`transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
-                      />
-                    </button>
-                  ) : (
-                    <span className="w-10 shrink-0" />
-                  )}
-
-                  {/* Main row — click to open reading view */}
-                  <button
-                    onClick={() => onOpenReading(chapter.slug)}
-                    data-testid={`home-chapter-${chapter.slug}`}
-                    className="flex-1 flex items-center justify-between gap-4 px-3 py-3.5 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-1 rounded-r-lg"
-                  >
-                    <div className="flex items-baseline gap-3 min-w-0">
-                      <span className="shrink-0 text-[11px] uppercase tracking-[0.15em] font-sans text-primary/50 font-medium w-20 text-right">
-                        {label}
-                      </span>
-                      <span className="font-serif text-foreground text-[0.97rem] leading-snug truncate">
-                        {shortTitle}
-                      </span>
-                    </div>
-                    <div className="shrink-0 flex items-center gap-3">
-                      {sections.length > 0 && (
-                        <span className="text-[11px] font-sans text-muted-foreground/45 hidden sm:block">
-                          {sections.length} sections
-                        </span>
-                      )}
-                      <ArrowRight
-                        size={14}
-                        className="text-muted-foreground/30 group-hover:text-primary/60 group-hover:translate-x-0.5 transition-all"
-                      />
-                    </div>
-                  </button>
-                </div>
-
-                {/* Expanded sections */}
-                {isExpanded && sections.length > 0 && (
-                  <ol className="ml-10 pl-3 border-l border-border/50 mt-0.5 mb-1 space-y-0" role="list">
-                    {sections.map((section) => (
-                      <li key={section.slug} role="listitem">
-                        <button
-                          onClick={() => onOpenReading(chapter.slug, section.slug)}
-                          data-testid={`home-section-${section.slug}`}
-                          className="w-full text-left px-3 py-2 text-[0.82rem] font-sans text-muted-foreground hover:text-primary transition-colors rounded flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-1"
-                        >
-                          <span className="flex-1 leading-snug">{section.title}</span>
-                          <ArrowRight size={12} className="shrink-0 opacity-0 group-hover:opacity-50 transition-opacity" />
-                        </button>
-                      </li>
-                    ))}
-                  </ol>
-                )}
-              </li>
-            );
-          })}
-        </ol>
       </section>
 
-      {/* ── Footer ──────────────────────────────────────────────────── */}
-      <footer className="border-t border-border px-5 sm:px-8 py-8">
-        <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5">
-            <BookOpen size={13} className="text-muted-foreground/40" />
-            <span className="font-sans text-xs text-muted-foreground/50">
-              Non-Extractive Capital
-            </span>
+      {/* ── TABLE OF CONTENTS ─────────────────────────────────────────── */}
+      <section
+        ref={tocRef}
+        id="toc-section"
+        className="nec-toc-bg flex-1 px-6 sm:px-8 lg:px-12 py-20 md:py-28"
+        aria-label="Table of Contents"
+      >
+        <div className="max-w-4xl mx-auto">
+
+          {/* Section header */}
+          <div className="mb-14">
+            <p
+              className="font-sans text-[10px] tracking-[0.30em] uppercase font-medium mb-4"
+              style={{ color: "rgba(201,160,58,0.55)" }}
+            >
+              Full Contents
+            </p>
+            <h2
+              className="font-serif font-bold leading-none tracking-tight"
+              style={{ fontSize: "clamp(1.6rem, 3.5vw, 2.4rem)", color: "#f0ede6" }}
+            >
+              Table of Contents
+            </h2>
+            <div
+              className="mt-6 h-px"
+              style={{ background: "linear-gradient(90deg, rgba(201,160,58,0.3) 0%, rgba(201,160,58,0.06) 60%, transparent 100%)" }}
+            />
           </div>
-          <p className="font-sans text-xs text-muted-foreground/40">
+
+          {/* Chapter list */}
+          <ol className="space-y-1" role="list">
+            {book.chapters.map((chapter, idx) => {
+              const label = chapterLabel(idx, book.chapters.length);
+              const shortTitle = chapter.title.replace(/^Chapter \d+:\s*/, "");
+              const sections = chapter.sections.filter((s) => s.title);
+              const isExpanded = expandedChapter === chapter.slug;
+
+              return (
+                <li key={chapter.slug} role="listitem">
+                  <div
+                    className="rounded transition-all duration-150"
+                    style={{
+                      border: "1px solid rgba(255,255,255,0.05)",
+                      background: isExpanded
+                        ? "rgba(201,160,58,0.04)"
+                        : "rgba(255,255,255,0.02)",
+                    }}
+                  >
+                    <div className="flex items-stretch">
+                      {/* Expand toggle */}
+                      {sections.length > 0 ? (
+                        <button
+                          onClick={() => toggleExpand(chapter.slug)}
+                          aria-expanded={isExpanded}
+                          aria-label={isExpanded ? "Collapse" : "Expand sections"}
+                          className="shrink-0 flex items-center justify-center w-10 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/20 rounded-l"
+                          style={{ color: isExpanded ? "rgba(201,160,58,0.6)" : "rgba(255,255,255,0.18)" }}
+                        >
+                          <ChevronRight
+                            size={13}
+                            className={`transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
+                          />
+                        </button>
+                      ) : (
+                        <span className="w-10 shrink-0" />
+                      )}
+
+                      {/* Main chapter row */}
+                      <button
+                        onClick={() => onOpenReading(chapter.slug)}
+                        data-testid={`home-chapter-${chapter.slug}`}
+                        className="flex-1 flex items-center justify-between gap-4 px-3 py-4 text-left group focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/25 rounded-r transition-all"
+                      >
+                        <div className="flex items-baseline gap-4 min-w-0">
+                          {/* Chapter label */}
+                          <span
+                            className="shrink-0 font-sans text-[10px] tracking-[0.18em] uppercase font-medium w-14 text-right"
+                            style={{ color: "rgba(201,160,58,0.55)" }}
+                          >
+                            {label}
+                          </span>
+                          {/* Chapter title */}
+                          <span
+                            className="font-serif text-[0.98rem] leading-snug group-hover:text-white transition-colors"
+                            style={{ color: "rgba(240,232,210,0.82)" }}
+                          >
+                            {shortTitle}
+                          </span>
+                        </div>
+
+                        <div className="shrink-0 flex items-center gap-3">
+                          {sections.length > 0 && (
+                            <span
+                              className="font-sans text-[10px] hidden sm:block"
+                              style={{ color: "rgba(255,255,255,0.20)" }}
+                            >
+                              {sections.length} sections
+                            </span>
+                          )}
+                          <ArrowRight
+                            size={13}
+                            className="transition-all group-hover:translate-x-0.5"
+                            style={{ color: "rgba(201,160,58,0.30)" }}
+                          />
+                        </div>
+                      </button>
+                    </div>
+
+                    {/* Expanded sections */}
+                    {isExpanded && sections.length > 0 && (
+                      <div
+                        className="pb-2 pt-1 mx-10"
+                        style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
+                      >
+                        <ol className="space-y-0" role="list">
+                          {sections.map((section) => (
+                            <li key={section.slug} role="listitem">
+                              <button
+                                onClick={() => onOpenReading(chapter.slug, section.slug)}
+                                data-testid={`home-section-${section.slug}`}
+                                className="w-full text-left px-3 py-2 text-[0.79rem] font-sans rounded transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/20 flex items-center gap-2 group"
+                                style={{ color: "rgba(220,210,188,0.48)" }}
+                              >
+                                <span
+                                  className="w-1 h-1 rounded-full shrink-0"
+                                  style={{ background: "rgba(201,160,58,0.35)" }}
+                                />
+                                <span className="flex-1 leading-snug group-hover:text-white/70 transition-colors">
+                                  {section.title}
+                                </span>
+                              </button>
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+      </section>
+
+      {/* ── Footer ──────────────────────────────────────────────────────── */}
+      <footer
+        className="px-6 sm:px-8 lg:px-12 py-10"
+        style={{ background: "#030410", borderTop: "1px solid rgba(255,255,255,0.06)" }}
+      >
+        <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-4">
+          <NecLogo size="sm" />
+          <p className="font-sans text-xs" style={{ color: "rgba(220,210,188,0.25)" }}>
             <span className="font-serif italic">{book.title}</span> — Working manuscript
           </p>
         </div>

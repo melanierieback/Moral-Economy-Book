@@ -1,0 +1,151 @@
+Please continue from the previous visual-design pass.  The current book reader is functional and structurally close, but I want it to look much more like the existing Non-Extractive Capital / DSF website.
+
+I am uploading a zip file containing screenshots of the existing Non-Extractive Capital / DSF website and visual style.  Please inspect those screenshots first and use them as the primary visual reference for this design pass.
+
+Important:
+
+* Do not rewrite, summarize, or alter the book content.
+* Do not break the LaTeX parser, generated `book.json`, dynamic Table of Contents, search, anchors, routing, or reader navigation.
+* Keep the current information architecture:
+
+  * front page / landing page with a prominent Table of Contents
+  * separate reading view for chapters/sections
+  * clear “← Back to Contents” navigation while reading
+* Focus this pass on visual design, branding, color palette, typography, spacing, and atmosphere.
+* Do not rebuild the app from scratch unless absolutely necessary.
+
+Use the real Non-Extractive Capital branding:
+
+* Use the uploaded Non-Extractive Capital logo image.
+* Do not use an invented text mark if the real logo is available.
+* Do not invent or use any other organization name.
+* Header/site identity should clearly be **Non-Extractive Capital**.
+
+Visual direction:
+The design should inherit the house style from the uploaded NEC / DSF screenshots.  In particular, please adapt the reader toward:
+
+* very dark navy / near-black backgrounds
+* purple-blue gradients
+* luminous starburst or light-flare motifs
+* high-contrast white or off-white text on dark areas
+* clean modern sans-serif navigation
+* sharp but refined panel/card layouts
+* restrained glow effects
+* a serious, technical, mission-driven atmosphere
+
+But this is still a book reader:
+
+* Long-form reading text must remain comfortable.
+* The Table of Contents should remain prominent and easy to scan.
+* The reading surface can use ivory / parchment / off-white for readability.
+* Use muted gold accents sparingly to connect the moral-economy / manuscript feeling with the NEC style.
+
+Target aesthetic:
+A beautiful moral-economy reader inside the Non-Extractive Capital digital ecosystem.
+
+Think:
+
+* NEC dark luminous interface first
+* refined online monograph second
+* illuminated manuscript warmth inside a serious dark technological frame
+
+Front page / hero:
+Please revise the front page so it feels more like the NEC / DSF website:
+
+* dark navy / black / purple-gradient background
+* subtle starburst / luminous flare motif inspired by the NEC logo and uploaded screenshots
+* real NEC logo in the top-left header
+* title: “Capital That Serves Life”
+* subtitle: “Recovering Moral Economy in an Age of Extraction”
+* description: “A reader on ownership, finance, stewardship, and the recovery of an economy ordered toward life.”
+* buttons:
+
+  * “Start with the Prologue”
+  * “View Table of Contents”
+* Avoid a giant flat blue block.
+* Use layered gradients, light, depth, and refined spacing.
+
+Cover art:
+Please improve the cover-art panel so it feels connected to the NEC visual identity.
+It should combine:
+
+* dark navy / black
+* purple-blue luminous gradients
+* starburst / light flare motif
+* fine gold linework
+* roots / branching networks / capital-flow diagrams
+* open book or illuminated manuscript motif
+* moral economy and non-extractive capital symbolism
+
+It should not look like:
+
+* a simple placeholder diagram
+* a generic network chart
+* a SaaS illustration
+* crypto/web3 graphics
+* stock charts
+* generic finance imagery
+
+Table of Contents:
+The Table of Contents should remain the visual heart of the front page.
+Restyle it so it feels both book-like and NEC-branded:
+
+* prominent and central
+* polished card or panel system
+* chapter rows with strong hierarchy
+* clean section counts
+* refined expand/collapse interactions
+* subtle dark borders, luminous accents, or NEC-style panel framing
+* muted gold for chapter numbers or active states
+* high readability
+* no default accordion look
+
+The ToC must include:
+
+* Prologue
+* Chapters 1-17
+* Conclusion
+* expandable sections where already available
+
+Reading view:
+Please update the reading view so it belongs to the same NEC ecosystem:
+
+* dark NEC-style header with the real logo
+* clear “← Back to Contents” button
+* subtle breadcrumbs
+* reading progress indicator
+* comfortable ivory / off-white reading surface
+* refined serif typography for the body text
+* elegant chapter/section heading treatments
+* previous/next navigation at the bottom
+* avoid a heavy utilitarian file-tree sidebar
+* if a side outline remains, make it secondary, refined, and less visually dominant
+
+Typography:
+
+* Use a clean modern sans-serif for NEC header/navigation/UI.
+* Use an elegant serif for the book title, chapter headings, and body text if it remains readable.
+* Use small caps sparingly for labels like “Working Manuscript,” “Chapter,” and “Table of Contents.”
+* Avoid weak low-contrast gray text.
+
+Color guidance:
+Use the uploaded screenshots as the source of truth, but generally move toward:
+
+* near-black / very dark navy main background
+* deep purple-blue gradients
+* luminous purple starburst / glow
+* white or off-white text on dark areas
+* ivory / parchment for long-form reading panels
+* muted gold for accents
+* electric blue/cyan only sparingly for UI emphasis
+
+Acceptance criteria:
+
+* The uploaded NEC logo is used.
+* The design clearly resembles the uploaded NEC / DSF screenshots.
+* The front page still has a prominent Table of Contents.
+* The reading view still has a clear “← Back to Contents” button.
+* The cover art feels richer and connected to NEC, not like a placeholder.
+* The app feels more visually compelling and less generic.
+* Search, anchors, parser behavior, routing, and mobile layout still work.
+* The site still builds successfully.
