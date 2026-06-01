@@ -275,19 +275,19 @@ export function Reader() {
         {/* Main content */}
         <main className="flex-1 lg:ml-64 xl:ml-72 min-h-screen" id="main-content">
           {/* Hero / landing */}
-          <div className="bg-primary text-primary-foreground py-16 md:py-22 px-6 md:px-12 lg:px-16">
-            <div className="max-w-2xl mx-auto">
-              <p className="text-[11px] uppercase tracking-[0.25em] font-sans opacity-50 mb-5">
+          <div className="bg-primary text-primary-foreground py-14 md:py-20 px-5 sm:px-8 md:px-12 lg:px-16 overflow-hidden">
+            <div className="max-w-2xl">
+              <p className="text-[11px] uppercase tracking-[0.22em] font-sans opacity-50 mb-5">
                 Working manuscript
               </p>
-              <h1 className="font-serif text-3xl md:text-[2.8rem] font-bold leading-tight mb-4 tracking-tight">
+              <h1 className="font-serif text-[1.85rem] sm:text-3xl md:text-[2.8rem] font-bold leading-tight mb-4 tracking-tight break-words">
                 {book.title}
               </h1>
-              <p className="font-serif text-lg md:text-xl opacity-65 italic leading-relaxed">
+              <p className="font-serif text-base sm:text-lg md:text-xl opacity-65 italic leading-relaxed">
                 {book.subtitle}
               </p>
               <div className="mt-8 h-px bg-primary-foreground/15" />
-              <div className="mt-6 flex items-center gap-5 flex-wrap">
+              <div className="mt-6 flex items-center gap-4 flex-wrap">
                 <p className="text-[0.8rem] opacity-45 font-sans">
                   {book.chapters.length} chapters
                 </p>
