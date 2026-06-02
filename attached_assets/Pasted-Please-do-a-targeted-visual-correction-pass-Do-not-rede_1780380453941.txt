@@ -1,0 +1,710 @@
+Please do a targeted visual correction pass.  Do not redesign the whole app.  The front page is now much closer to the reference, but there are two specific problems that need to be fixed:
+
+1. The Non-Extractive Capital logo / starburst image is still visibly squished or distorted.
+2. The reader page still does not match the reference mockup.  Its colors are washed out, its layout is not faithful enough, and the bottom navigation area does not match the reference.
+
+I am providing the reference image again:
+
+`target-mockup-nec-book-reader.png`
+
+Please use this file as the visual source of truth.
+
+Important:
+
+* Do not rewrite, summarize, or alter the book content.
+* Do not modify the LaTeX parser unless absolutely necessary.
+* Do not modify `book.json` generation unless absolutely necessary.
+* Do not break the dynamic Table of Contents.
+* Do not break search.
+* Do not break anchors.
+* Do not break routing.
+* Do not rebuild the app from scratch.
+* Do not change the main front-page structure except where necessary to fix logo/image distortion.
+* Focus only on:
+
+  * logo/starburst distortion
+  * reader-page layout
+  * reader-page colors
+  * reader-page sidebar
+  * reader-page bottom navigation
+  * reader-page typography/spacing
+
+PART 1 - FIX THE NEC LOGO / STARBURST DISTORTION
+
+Problem:
+The logo/starburst currently looks horizontally or vertically squished in several places.  This is almost certainly because CSS is forcing both width and height, or because the image is being placed inside a container with the wrong aspect ratio.
+
+Required fix:
+Use the actual uploaded logo image:
+
+`/public/assets/nec-logo.png`
+
+Never stretch this image.  Never force both width and height in a way that changes its aspect ratio.
+
+Implementation requirements:
+
+* All logo instances must use:
+
+```jsx
+<img className="nec-logo" src="/assets/nec-logo.png" alt="Non-Extractive Capital" />
+```
+
+* Do not use a recreated text logo.
+* Do not use a cropped icon-only logo unless explicitly required for a tiny mobile context.
+* Do not use the current distorted/squished version.
+* Do not set both fixed width and fixed height unless `object-fit: contain` is also used and the container respects the original aspect ratio.
+* Do not use `background-size: cover` for the logo.
+* Do not place the logo as a CSS background image unless unavoidable.
+
+Use CSS like this:
+
+```css
+.nec-logo {
+  display: block;
+  width: auto;
+  height: 48px;
+  max-width: 260px;
+  object-fit: contain;
+}
+
+.site-header .nec-logo {
+  height: 46px;
+  width: auto;
+}
+
+.reader-sidebar .nec-logo {
+  height: 42px;
+  width: auto;
+  max-width: 220px;
+}
+
+.mobile-header .nec-logo {
+  height: 34px;
+  width: auto;
+  max-width: 180px;
+}
+
+.site-footer .nec-logo {
+  height: 38px;
+  width: auto;
+  max-width: 220px;
+}
+```
+
+If the logo still appears too large/small, adjust only the `height`, not both width and height.
+
+Also check parent containers:
+
+* Remove any CSS that forces the logo container to a square shape.
+* Remove any CSS like `width: 100%; height: 100%` on the logo image.
+* Remove any CSS like `object-fit: cover` on the logo.
+* Use `object-fit: contain`.
+* Make sure the image is not clipped by `overflow: hidden`.
+
+Acceptance criteria for logo fix:
+
+* The purple starburst in the logo must be square, not squeezed.
+* The “NON-EXTRACTIVE CAPITAL” wordmark must be crisp and readable.
+* The logo must look correct in:
+
+  * main header
+  * reader sidebar
+  * footer
+  * mobile header
+* The logo must not be recreated in plain text.
+
+PART 2 - REDESIGN THE READER PAGE TO MATCH THE REFERENCE
+
+The current reader page is structurally functional, but visually it does not match the reference image.  Please revise the reader page so it matches the top-right reading-view panel in `target-mockup-nec-book-reader.png`.
+
+The target reading view has this structure:
+
+* A dark top header.
+* A dark left sidebar / contents outline.
+* A large ivory/off-white reading surface on the right.
+* A clear “← Back to Contents” link in the dark header/sidebar area.
+* Search/bookmark/dark-mode controls in the top-right.
+* A progress indicator in the sidebar.
+* A section outline in the sidebar.
+* A refined ivory reading page with dark serif text.
+* A bottom navigation bar attached to the reading surface with:
+
+  * Previous section on the left
+  * Section progress in the center
+  * Next section on the right
+
+Do not keep the current washed-out white page floating beside a utilitarian dark sidebar.  Make it look like the reference.
+
+READER PAGE LAYOUT - DESKTOP
+
+Use this exact desktop layout:
+
+```text
+┌──────────────────────────────────────────────────────────────┐
+│ dark header: NEC logo | ← Back to Contents | Search | icons  │
+├───────────────────┬──────────────────────────────────────────┤
+│ dark sidebar      │ ivory reading page                       │
+│ progress          │ breadcrumbs                              │
+│ contents outline  │ chapter label                            │
+│ view full contents│ title                                    │
+│                   │ ornamental divider                       │
+│                   │ body text                                │
+│                   │                                          │
+├───────────────────┴──────────────────────────────────────────┤
+│ bottom nav: Previous | Section X of Y + progress | Next      │
+└──────────────────────────────────────────────────────────────┘
+```
+
+Concrete dimensions:
+
+* Top header height: 64px.
+* Sidebar width: 300px.
+* Main reading panel should fill the remaining width.
+* Reading content max-width: 780px.
+* Reading content left/right padding: 72px desktop.
+* Reading content top padding: 56px to 72px.
+* Bottom navigation height: 72px to 88px.
+
+Use CSS Grid if helpful:
+
+```css
+.reader-layout {
+  min-height: 100vh;
+  background: var(--nec-black);
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  grid-template-rows: 64px minmax(0, 1fr) 82px;
+  grid-template-areas:
+    "header header"
+    "sidebar main"
+    "sidebar bottomnav";
+}
+```
+
+Header:
+
+```css
+.reader-header {
+  grid-area: header;
+  height: 64px;
+  background: rgba(3, 4, 12, 0.98);
+  border-bottom: 1px solid rgba(214, 169, 58, 0.18);
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+}
+```
+
+Sidebar:
+
+```css
+.reader-sidebar {
+  grid-area: sidebar;
+  background:
+    linear-gradient(180deg, rgba(7, 11, 28, 0.98), rgba(3, 4, 12, 0.98));
+  border-right: 1px solid rgba(214, 169, 58, 0.16);
+  color: var(--nec-text-light);
+  padding: 28px 24px;
+  overflow-y: auto;
+}
+```
+
+Main:
+
+```css
+.reader-main {
+  grid-area: main;
+  background: var(--nec-ivory);
+  color: #151923;
+  overflow-y: auto;
+}
+```
+
+Bottom nav:
+
+```css
+.reader-bottom-nav {
+  grid-area: bottomnav;
+  background: var(--nec-ivory);
+  border-top: 1px solid rgba(20, 24, 35, 0.12);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 48px;
+}
+```
+
+READER HEADER DETAILS
+
+The reader header must look like the reference:
+
+* dark near-black background
+* real NEC logo at left
+* “← Back to Contents” in muted gold
+* search on the right
+* bookmark icon if already implemented
+* moon/dark mode icon if already implemented
+
+Layout:
+
+```text
+[NEC logo]   [← Back to Contents]                 [Search] [Bookmark] [Moon]
+```
+
+CSS:
+
+```css
+.reader-back-link {
+  color: var(--nec-gold-soft);
+  text-decoration: none;
+  font-size: 15px;
+  margin-left: 32px;
+}
+
+.reader-back-link:hover {
+  color: var(--nec-gold);
+}
+```
+
+Do not make “Back to Contents” tiny or hidden.  It must be visible and easy to find.
+
+READER SIDEBAR DETAILS
+
+The sidebar must match the reference:
+
+* dark navy / black
+* high contrast
+* progress label near top
+* purple/gold progress bar
+* “CONTENTS OUTLINE” small-caps label
+* current chapter and section list
+* active section in gold
+* inactive sections in muted ivory/gray
+* “VIEW FULL CONTENTS” button near bottom
+
+Progress block:
+
+```text
+48% COMPLETE
+[purple/gold progress bar]
+```
+
+CSS:
+
+```css
+.reader-progress-label {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--nec-text-light);
+  margin-bottom: 10px;
+}
+
+.reader-progress-track {
+  width: 100%;
+  height: 3px;
+  background: rgba(255,255,255,0.12);
+}
+
+.reader-progress-fill {
+  height: 3px;
+  background: linear-gradient(90deg, var(--nec-purple-glow), var(--nec-gold));
+}
+```
+
+Sidebar outline:
+
+```css
+.sidebar-label {
+  margin-top: 34px;
+  margin-bottom: 18px;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(247, 240, 223, 0.58);
+}
+
+.sidebar-chapter-title {
+  color: var(--nec-text-light);
+  font-family: var(--font-serif);
+  font-size: 15px;
+  line-height: 1.35;
+  margin-bottom: 18px;
+}
+
+.sidebar-section-link {
+  display: block;
+  padding: 9px 0 9px 14px;
+  border-left: 1px solid rgba(214,169,58,0.18);
+  color: rgba(247, 240, 223, 0.62);
+  text-decoration: none;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.sidebar-section-link.active {
+  color: var(--nec-gold);
+  border-left-color: var(--nec-gold);
+  font-weight: 600;
+}
+
+.sidebar-section-link:hover {
+  color: var(--nec-text-light);
+}
+```
+
+View full contents button:
+
+```css
+.view-full-contents {
+  margin-top: 40px;
+  width: 100%;
+  height: 48px;
+  border: 1px solid rgba(214,169,58,0.28);
+  background: rgba(255,255,255,0.03);
+  color: var(--nec-text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 11px;
+}
+```
+
+MAIN READING SURFACE DETAILS
+
+The main reading surface must be ivory, not gray-white, not washed out.
+
+Use:
+
+```css
+:root {
+  --nec-ivory: #f5efe2;
+  --nec-ivory-2: #efe4cf;
+  --reader-text: #151923;
+}
+```
+
+Main surface:
+
+```css
+.reader-main {
+  background:
+    linear-gradient(180deg, #f8f1e4 0%, #f2e8d5 100%);
+  color: var(--reader-text);
+}
+```
+
+Reading article:
+
+```css
+.reader-article {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 64px 72px 96px;
+}
+```
+
+Breadcrumbs:
+
+```css
+.reader-breadcrumbs {
+  font-size: 13px;
+  color: rgba(21,25,35,0.48);
+  margin-bottom: 42px;
+}
+
+.reader-breadcrumbs a {
+  color: #8b6b22;
+  text-decoration: none;
+}
+```
+
+Chapter label:
+
+```css
+.reader-chapter-label {
+  color: #a37a22;
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+```
+
+Title:
+
+```css
+.reader-title {
+  font-family: var(--font-serif);
+  color: #111722;
+  font-size: clamp(38px, 4vw, 54px);
+  line-height: 1.08;
+  font-weight: 500;
+  margin: 0;
+}
+```
+
+Ornamental divider:
+
+```css
+.reader-divider {
+  width: 100%;
+  max-width: 520px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(163,122,34,0.45),
+    rgba(163,122,34,0.95),
+    rgba(163,122,34,0.45),
+    transparent
+  );
+  margin: 28px 0 44px;
+  position: relative;
+}
+```
+
+Body:
+
+```css
+.reader-body {
+  font-family: var(--font-serif);
+  font-size: 19px;
+  line-height: 1.78;
+  color: #222632;
+}
+
+.reader-body p {
+  margin: 0 0 1.35em;
+}
+
+.reader-body p + p {
+  text-indent: 1.4em;
+}
+```
+
+Do not let the reader text become too pale.  The text should be strong near-black on ivory.
+
+BOTTOM NAVIGATION - MUST MATCH THE REFERENCE
+
+The current bottom area is wrong.  In the reference, the bottom nav is a clear horizontal bar at the bottom of the reading panel, with three zones:
+
+```text
+← Previous                         Section 5 of 14                         Next →
+Extraction and Power              [gold progress line]              Extraction and Dependency
+```
+
+Implement this as an actual bottom bar, not scattered links inside the article.
+
+CSS:
+
+```css
+.reader-bottom-nav {
+  background: #f3e8d5;
+  border-top: 1px solid rgba(21,25,35,0.12);
+  display: grid;
+  grid-template-columns: 1fr minmax(220px, 360px) 1fr;
+  align-items: center;
+  gap: 24px;
+  padding: 0 48px;
+  min-height: 82px;
+}
+
+.reader-bottom-prev,
+.reader-bottom-next {
+  color: #151923;
+  text-decoration: none;
+  font-family: var(--font-serif);
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.reader-bottom-prev {
+  justify-self: start;
+}
+
+.reader-bottom-next {
+  justify-self: end;
+  text-align: right;
+}
+
+.reader-bottom-kicker {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #8b6b22;
+  margin-bottom: 4px;
+}
+
+.reader-bottom-center {
+  text-align: center;
+  color: #151923;
+  font-size: 13px;
+}
+
+.reader-bottom-progress-track {
+  margin-top: 8px;
+  width: 100%;
+  height: 3px;
+  background: rgba(21,25,35,0.14);
+}
+
+.reader-bottom-progress-fill {
+  height: 3px;
+  background: var(--nec-gold);
+}
+```
+
+The bottom nav must be sticky at the bottom of the layout area or placed immediately below the reading article, but it must visually resemble the reference:
+
+* ivory background
+* clear left/center/right layout
+* gold progress line in the center
+* previous and next labels aligned to sides
+
+Do not use the current scattered “previous / top / next” layout.
+
+COLORS - MAKE THE READER VIEW LESS WASHED OUT
+
+The current reader view looks washed out.  Increase contrast and saturation.
+
+Use this palette:
+
+```css
+:root {
+  --nec-black: #03040c;
+  --nec-navy: #070b1c;
+  --nec-deep-navy: #0a1024;
+  --nec-purple: #4b22c8;
+  --nec-purple-glow: #8b5cff;
+  --nec-gold: #d6a93a;
+  --nec-gold-soft: #e2c568;
+  --nec-ivory: #f5efe2;
+  --nec-ivory-2: #efe4cf;
+  --nec-text-light: #f7f0df;
+  --nec-text-muted: rgba(247,240,223,0.62);
+  --reader-text: #151923;
+}
+```
+
+Avoid:
+
+* pale gray text on ivory
+* dull gray sidebar text
+* flat black with no visual hierarchy
+* washed-out gold
+* purple so dark that the glow disappears
+
+STARBURST / BACKGROUND ON FRONT PAGE
+
+The front page is much better now, but the starburst/background still looks squished.
+
+Fix:
+
+* The background image must never be distorted.
+* Do not use an `<img>` tag stretched to fill the hero unless it uses object-fit correctly.
+* Prefer CSS background image.
+
+Use:
+
+```css
+.hero-section {
+  background-image:
+    linear-gradient(90deg, rgba(3,4,12,.96), rgba(9,7,32,.72), rgba(3,4,12,.92)),
+    url('/assets/cosmic-grid-purple-background.png');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+```
+
+If using an absolutely positioned image:
+
+```css
+.hero-bg-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+}
+```
+
+Do not use:
+
+```css
+background-size: 100% 100%;
+```
+
+Do not use:
+
+```css
+img { width: 100%; height: 100%; }
+```
+
+unless paired with:
+
+```css
+object-fit: cover;
+```
+
+For the NEC logo, do NOT use object-fit cover.  Use object-fit contain.
+
+FRONT PAGE MUST NOT REGRESS
+
+The front page is now mostly acceptable.  Only fix:
+
+* squished starburst/background
+* logo distortion
+* color vibrancy if needed
+
+Do not substantially redesign the front page again.
+
+MOBILE READER VIEW
+
+For mobile:
+
+* Remove permanent sidebar.
+* Header: dark, NEC logo, back to contents.
+* Main reading surface: ivory.
+* Bottom nav: stacked or compact, but with previous/next and section progress.
+* Text size: 18px.
+* Padding: 24px.
+* Keep the “Back to Contents” button visible near the top.
+
+Implementation sequence:
+
+1. Find all CSS affecting the NEC logo.  Remove any forced width+height distortion.  Apply the `.nec-logo` rules above.
+2. Find the hero/background implementation.  Ensure the background image uses `background-size: cover` or image `object-fit: cover`, never stretching.
+3. Find the reader page component/layout.
+4. Replace the reader page layout with the explicit grid layout described above.
+5. Restyle the reader sidebar exactly as described.
+6. Restyle the main ivory reading page exactly as described.
+7. Replace the bottom navigation with the explicit three-column bottom nav.
+8. Run the app and verify:
+
+   * logo not squished
+   * front page still good
+   * reader page resembles the top-right reader panel in `target-mockup-nec-book-reader.png`
+   * search still works
+   * dynamic ToC still works
+   * back to contents works
+   * previous/next navigation works
+   * anchors still work
+9. Build the project and fix only build errors.
+
+Acceptance criteria:
+
+* The NEC logo is no longer distorted anywhere.
+* The front-page starburst/background is no longer squished.
+* The reader page closely matches the top-right reader-page section of `target-mockup-nec-book-reader.png`.
+* The reader page uses a dark NEC sidebar/header and ivory reading panel.
+* The reader page colors are vivid, not washed out.
+* The bottom navigation is a proper three-column bar matching the reference.
+* The “← Back to Contents” control is visible and gold.
+* The sidebar active item is gold.
+* Body text is strong near-black on ivory.
+* The app still builds.
+* No content or parser functionality is broken.

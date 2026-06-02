@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Menu, X, Sun, Moon, ArrowLeft, Bookmark, ChevronRight } from "lucide-react";
+import { Menu, X, Sun, Moon, ArrowLeft, Bookmark, Search as SearchIcon } from "lucide-react";
 import { book } from "../lib/book";
 import { TOC } from "../components/TOC";
 import { ChapterView } from "../components/ChapterView";
@@ -13,6 +13,10 @@ interface ReaderProps {
   darkMode: boolean;
   onToggleDark: () => void;
 }
+
+const HEADER_H = 64;
+const BOTTOM_NAV_H = 82;
+const SIDEBAR_W = 300;
 
 function useSectionScrollspy(chapterSlug: string) {
   const chapter = book.chapters.find((c) => c.slug === chapterSlug);
@@ -50,7 +54,7 @@ function useSectionScrollspy(chapterSlug: string) {
             updateActive();
           }
         },
-        { rootMargin: "-80px 0px -60% 0px", threshold: 0 }
+        { rootMargin: `-${HEADER_H + 16}px 0px -50% 0px`, threshold: 0 }
       );
       obs.observe(el);
       observers.push(obs);
@@ -87,6 +91,21 @@ export function Reader({ initialChapterSlug, initialSectionSlug, onGoHome, darkM
 
   const activeSlug = useSectionScrollspy(currentChapterSlug);
   const scrollProgress = useScrollProgress();
+
+  // Derived chapter/section progress
+  const sectionSlugs = currentChapter?.sections.filter((s) => s.title).map((s) => s.slug) ?? [];
+  const activeSecIdx = sectionSlugs.indexOf(activeSlug);
+  const currentSecNum = activeSecIdx >= 0 ? activeSecIdx + 1 : 1;
+  const totalSections = sectionSlugs.length;
+
+  const chapterProgress = sectionSlugs.length > 0
+    ? Math.max(0, activeSecIdx) / sectionSlugs.length + scrollProgress / sectionSlugs.length
+    : scrollProgress;
+  const overallPct = book.chapters.length > 0
+    ? Math.round(((currentChapterIndex + chapterProgress) / book.chapters.length) * 100)
+    : 0;
+
+  const shortTitle = (title: string) => title.replace(/^Chapter \d+:\s*/, "");
 
   useEffect(() => {
     try { localStorage.setItem("nec-last-chapter", currentChapterSlug); } catch { /* ignore */ }
@@ -131,21 +150,6 @@ export function Reader({ initialChapterSlug, initialSectionSlug, onGoHome, darkM
     setMobileOpen(false);
   }, []);
 
-  const activeTocSlug = activeSlug || currentChapterSlug;
-
-  const activeChapterIndex = book.chapters.findIndex((c) => c.slug === currentChapterSlug);
-  const sectionSlugs = currentChapter?.sections.filter((s) => s.title).map((s) => s.slug) ?? [];
-  const activeSecIdx = sectionSlugs.indexOf(activeSlug);
-  const chapterProgress = sectionSlugs.length > 0
-    ? Math.max(0, activeSecIdx) / sectionSlugs.length + scrollProgress / sectionSlugs.length
-    : scrollProgress;
-  const overallPct = book.chapters.length > 0
-    ? Math.round(((activeChapterIndex + chapterProgress) / book.chapters.length) * 100)
-    : 0;
-
-  const activeSection = currentChapter?.sections.find((s) => s.slug === activeSlug);
-  const chapterShortTitle = currentChapter?.title.replace(/^Chapter \d+:\s*/, "") ?? "";
-
   const handleSearchNavigate = useCallback((slug: string) => {
     const ch = book.chapters.find(c => c.slug === slug || c.sections.some(s => s.slug === slug));
     if (ch) { goToChapter(ch.slug); setTimeout(() => scrollToSection(slug), 200); }
@@ -159,79 +163,113 @@ export function Reader({ initialChapterSlug, initialSectionSlug, onGoHome, darkM
     }
   }, [currentChapterSlug, goToChapter, scrollToSection]);
 
-  return (
-    <div className="min-h-screen bg-background flex flex-col">
+  const activeTocSlug = activeSlug || currentChapterSlug;
 
-      {/* ── Mobile header ────────────────────────────────────────────── */}
-      <header className="lg:hidden sticky top-0 z-40 nec-reading-header">
-        <div className="flex items-center px-4 h-14 gap-2">
+  // Sidebar background
+  const sidebarBg = "linear-gradient(180deg, rgba(7,11,28,0.99) 0%, rgba(3,4,12,0.99) 100%)";
+
+  // Reading surface background
+  const readingBg = darkMode
+    ? "hsl(240 22% 8%)"
+    : "linear-gradient(180deg, #f8f1e4 0%, #f2e8d5 100%)";
+  const readingColor = darkMode ? "hsl(40 22% 88%)" : "#151923";
+
+  return (
+    <div
+      className="min-h-screen"
+      style={{ backgroundColor: "#03040c" }}
+    >
+      {/* ── STICKY READING HEADER (full width, spans sidebar + content) ─ */}
+      <header
+        className="sticky top-0 z-40"
+        style={{
+          height: HEADER_H,
+          background: "rgba(3,4,12,0.98)",
+          borderBottom: "1px solid rgba(214,169,58,0.18)",
+          backdropFilter: "blur(10px)",
+        }}
+      >
+        <div className="flex items-center h-full px-5 md:px-7 gap-4">
+          {/* Logo */}
           <NecLogo size="sm" className="shrink-0" />
 
-          <div className="flex-1 min-w-0 px-2">
-            <span className="font-sans text-[11px] truncate" style={{ color: "rgba(240,232,210,0.35)" }}>
-              {chapterShortTitle}
-            </span>
-          </div>
+          {/* ← Back to Contents (desktop) */}
+          <button
+            onClick={onGoHome}
+            data-testid="button-back-home-desktop"
+            className="hidden lg:flex items-center gap-1.5 font-sans font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30 rounded shrink-0"
+            style={{ fontSize: 14, color: "#e2c568", marginLeft: 16 }}
+          >
+            <ArrowLeft size={14} />
+            Back to Contents
+          </button>
 
-          <div className="flex items-center gap-1 shrink-0">
+          {/* Spacer */}
+          <div className="flex-1" />
+
+          {/* Right controls */}
+          <div className="flex items-center gap-2 shrink-0">
+            <Search onNavigate={handleSearchNavigate} />
+            <button
+              aria-label="Bookmark (coming soon)"
+              className="hidden sm:flex p-2 rounded opacity-30 cursor-default"
+              style={{ color: "rgba(240,232,210,0.6)" }}
+            >
+              <Bookmark size={15} />
+            </button>
+            <button
+              onClick={onToggleDark}
+              className="p-2 rounded transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30"
+              aria-label={darkMode ? "Light mode" : "Dark mode"}
+              data-testid="button-toggle-dark"
+              style={{ color: "rgba(240,232,210,0.45)" }}
+            >
+              {darkMode ? <Sun size={15} /> : <Moon size={15} />}
+            </button>
+            {/* Mobile: back to contents */}
             <button
               onClick={onGoHome}
               data-testid="button-back-home"
-              className="flex items-center gap-1 text-[11px] font-sans font-semibold px-2 py-1.5 rounded transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30"
-              style={{ color: "rgba(201,160,58,0.75)" }}
+              className="lg:hidden flex items-center gap-1 font-sans font-semibold px-2 py-1.5 rounded transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30"
+              style={{ fontSize: 12, color: "#e2c568" }}
             >
               <ArrowLeft size={12} />
               <span className="hidden sm:inline">Contents</span>
             </button>
-            <Search onNavigate={handleSearchNavigate} />
+            {/* Mobile: TOC drawer */}
             <button
               onClick={() => setMobileOpen(true)}
-              className="p-1.5 rounded transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30"
+              className="lg:hidden p-2 rounded transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30"
               data-testid="button-open-toc"
               aria-label="Open chapter outline"
-              style={{ color: "rgba(240,232,210,0.50)" }}
+              style={{ color: "rgba(240,232,210,0.55)" }}
             >
-              <Menu size={17} />
-            </button>
-            <button
-              onClick={onToggleDark}
-              className="p-1.5 rounded transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30"
-              aria-label={darkMode ? "Light mode" : "Dark mode"}
-              style={{ color: "rgba(240,232,210,0.40)" }}
-            >
-              {darkMode ? <Sun size={14} /> : <Moon size={14} />}
+              <Menu size={18} />
             </button>
           </div>
         </div>
-        {/* Progress bar */}
-        <div className="h-px w-full" style={{ background: "rgba(255,255,255,0.05)" }}>
-          <div
-            className="h-full transition-all duration-300"
-            style={{
-              width: `${overallPct}%`,
-              background: "linear-gradient(90deg, rgba(201,160,58,0.6), rgba(201,160,58,0.25))",
-            }}
-          />
-        </div>
       </header>
 
-      {/* ── Mobile drawer ─────────────────────────────────────────────── */}
+      {/* ── MOBILE DRAWER ────────────────────────────────────────────── */}
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex" role="dialog" aria-modal="true">
           <div
             className="fixed inset-0 backdrop-blur-sm"
-            style={{ background: "rgba(4,5,16,0.75)" }}
+            style={{ background: "rgba(3,4,14,0.80)" }}
             onClick={() => setMobileOpen(false)}
           />
-          <div className="relative flex flex-col w-72 max-w-[85vw] shadow-2xl" style={{ background: "#070919" }}>
+          <div
+            className="relative flex flex-col w-72 max-w-[85vw] shadow-2xl"
+            style={{ background: "#070b1c" }}
+          >
             <div
               className="flex items-center justify-between px-4 h-14 shrink-0"
-              style={{ borderBottom: "1px solid rgba(201,160,58,0.10)" }}
+              style={{ borderBottom: "1px solid rgba(214,169,58,0.10)" }}
             >
               <button
                 onClick={onGoHome}
-                className="flex items-center gap-1.5 text-[11px] font-sans font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30 rounded"
-                style={{ color: "rgba(201,160,58,0.72)" }}
+                className="flex items-center gap-1.5 font-sans font-semibold transition-colors focus-visible:outline rounded"
+                style={{ fontSize: 12, color: "#e2c568" }}
               >
                 <ArrowLeft size={13} />
                 Table of Contents
@@ -258,146 +296,180 @@ export function Reader({ initialChapterSlug, initialSectionSlug, onGoHome, darkM
         </div>
       )}
 
-      <div className="flex flex-1 relative">
+      {/* ── DESKTOP LAYOUT: sidebar (fixed) + reading content ─────────── */}
 
-        {/* ── Desktop sidebar ──────────────────────────────────────────── */}
-        <aside
-          className="hidden lg:flex flex-col fixed top-0 left-0 h-screen w-64 xl:w-72 z-30"
+      {/* Fixed sidebar — desktop only */}
+      <aside
+        className="hidden lg:flex flex-col"
+        style={{
+          position: "fixed",
+          top: HEADER_H,
+          left: 0,
+          width: SIDEBAR_W,
+          height: `calc(100vh - ${HEADER_H}px - ${BOTTOM_NAV_H}px)`,
+          background: sidebarBg,
+          borderRight: "1px solid rgba(214,169,58,0.14)",
+          zIndex: 30,
+          overflowY: "auto",
+        }}
+        aria-label="Chapter navigation"
+      >
+        <TOC
+          activeSlug={activeTocSlug}
+          scrollProgress={chapterProgress}
+          onNavigate={handleTocNavigate}
+          onChapterNavigate={goToChapter}
+          onGoHome={onGoHome}
+        />
+      </aside>
+
+      {/* Reading content — offset by sidebar + padded for bottom nav */}
+      <main
+        id="main-content"
+        style={{
+          marginLeft: 0,
+          paddingBottom: BOTTOM_NAV_H + 48,
+          background: readingBg,
+          color: readingColor,
+          minHeight: `calc(100vh - ${HEADER_H}px)`,
+        }}
+        className="lg:ml-[300px]"
+      >
+        {/* Reading article */}
+        <div
+          className="mx-auto"
           style={{
-            background: "#060718",
-            borderRight: "1px solid rgba(201,160,58,0.09)",
+            maxWidth: 780,
+            padding: "64px 28px 48px",
           }}
-          aria-label="Chapter navigation"
         >
-          {/* Sidebar header */}
-          <div
-            className="shrink-0 px-5 py-4"
-            style={{ borderBottom: "1px solid rgba(201,160,58,0.08)" }}
-          >
-            {/* Back + controls row */}
-            <div className="flex items-center justify-between mb-4">
-              <button
-                onClick={onGoHome}
-                data-testid="button-back-home-desktop"
-                className="flex items-center gap-1.5 text-[11px] font-sans font-semibold tracking-wide transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30 rounded"
-                style={{ color: "rgba(201,160,58,0.70)" }}
-              >
-                <ArrowLeft size={12} />
-                Back to Contents
-              </button>
-              <div className="flex items-center gap-2">
-                <Search onNavigate={handleSearchNavigate} />
-                <button
-                  aria-label="Bookmark (coming soon)"
-                  className="p-0.5 rounded opacity-30 cursor-default"
-                  style={{ color: "rgba(240,232,210,0.5)" }}
-                >
-                  <Bookmark size={13} />
-                </button>
-                <button
-                  onClick={onToggleDark}
-                  className="p-0.5 rounded transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30"
-                  aria-label={darkMode ? "Light mode" : "Dark mode"}
-                  data-testid="button-toggle-dark"
-                  style={{ color: "rgba(240,232,210,0.35)" }}
-                >
-                  {darkMode ? <Sun size={13} /> : <Moon size={13} />}
-                </button>
-              </div>
-            </div>
-
-            {/* Brand */}
-            <NecLogo size="sm" />
-          </div>
-
-          {/* TOC */}
-          <div className="flex-1 overflow-hidden">
-            <TOC
-              activeSlug={activeTocSlug}
-              scrollProgress={chapterProgress}
-              onNavigate={handleTocNavigate}
-              onChapterNavigate={goToChapter}
-              onGoHome={onGoHome}
-            />
-          </div>
-        </aside>
-
-        {/* ── Main reading content ──────────────────────────────────────── */}
-        <main
-          className="flex-1 lg:ml-64 xl:ml-72 min-h-screen bg-background"
-          id="main-content"
-        >
-          {/* Desktop reading header */}
-          <div
-            className="hidden lg:block sticky top-0 z-10 nec-reading-header"
-          >
-            <div className="max-w-[820px] mx-auto px-8 h-11 flex items-center justify-between gap-4">
-              {/* Breadcrumb */}
-              <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-[11px] font-sans min-w-0 flex-1">
-                <button
-                  onClick={onGoHome}
-                  className="hover:text-white/70 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/25 rounded shrink-0"
-                  style={{ color: "rgba(201,160,58,0.55)" }}
-                >
-                  Contents
-                </button>
-                <ChevronRight size={10} className="opacity-25 shrink-0" />
-                <span className="truncate" style={{ color: "rgba(240,232,210,0.38)" }}>
-                  {chapterShortTitle}
-                </span>
-                {activeSection && (
-                  <>
-                    <ChevronRight size={10} className="opacity-20 shrink-0" />
-                    <span className="truncate" style={{ color: "rgba(240,232,210,0.28)" }}>
-                      {activeSection.title}
-                    </span>
-                  </>
-                )}
-              </nav>
-              {/* Progress */}
-              <span
-                className="shrink-0 font-sans text-[10px] tabular-nums font-medium"
-                style={{ color: "rgba(201,160,58,0.45)" }}
-              >
-                {overallPct}% complete
-              </span>
-            </div>
-            {/* Reading progress bar */}
-            <div className="h-px w-full" style={{ background: "rgba(201,160,58,0.07)" }}>
-              <div
-                className="h-full transition-all duration-300"
-                style={{
-                  width: `${Math.round(scrollProgress * 100)}%`,
-                  background: "linear-gradient(90deg, rgba(201,160,58,0.50), rgba(201,160,58,0.18))",
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Chapter content */}
-          <div className="px-6 sm:px-8 md:px-10 lg:px-12 xl:px-16 py-10 md:py-14 max-w-[820px]">
+          <div style={{ paddingLeft: "clamp(0px, 5vw, 44px)", paddingRight: "clamp(0px, 5vw, 44px)" }}>
             {currentChapter && (
               <ChapterView
                 chapter={currentChapter}
                 chapterIndex={currentChapterIndex}
-                prevChapter={prevChapter}
-                nextChapter={nextChapter}
-                onNavigateChapter={goToChapter}
               />
             )}
           </div>
+        </div>
+      </main>
 
-          {/* Footer */}
-          <footer className="px-6 sm:px-8 md:px-10 lg:px-12 xl:px-16 py-8 border-t border-border">
-            <div className="max-w-[820px]">
-              <p className="text-xs text-muted-foreground/40 font-sans">
-                <span className="font-serif italic">{book.title}</span> &mdash; Working manuscript.
-                Non-Extractive Capital.
-              </p>
-            </div>
-          </footer>
-        </main>
-      </div>
+      {/* ── FIXED BOTTOM NAV ─────────────────────────────────────────── */}
+      <nav
+        aria-label="Chapter navigation"
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: BOTTOM_NAV_H,
+          zIndex: 30,
+          background: darkMode ? "#0e1120" : "#f3e8d5",
+          borderTop: `1px solid ${darkMode ? "rgba(255,255,255,0.07)" : "rgba(21,25,35,0.12)"}`,
+          display: "grid",
+          gridTemplateColumns: "1fr minmax(200px, 320px) 1fr",
+          alignItems: "center",
+          gap: 16,
+          padding: "0 24px",
+        }}
+        className="lg:pl-[324px] lg:pr-12"
+      >
+        {/* Previous */}
+        <div className="justify-self-start">
+          {prevChapter ? (
+            <button
+              onClick={() => goToChapter(prevChapter.slug)}
+              data-testid={`nav-prev-${prevChapter.slug}`}
+              className="group text-left flex flex-col gap-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 rounded transition-opacity hover:opacity-80"
+            >
+              <span
+                className="font-sans uppercase tracking-[0.14em] block"
+                style={{ fontSize: 11, color: "#8b6b22" }}
+              >
+                ← Previous
+              </span>
+              <span
+                className="font-serif leading-snug hidden sm:block"
+                style={{
+                  fontSize: 14,
+                  color: darkMode ? "rgba(240,232,210,0.80)" : "#151923",
+                  maxWidth: 200,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {shortTitle(prevChapter.title)}
+              </span>
+            </button>
+          ) : (
+            <div />
+          )}
+        </div>
+
+        {/* Center: section progress */}
+        <div className="flex flex-col items-center gap-1.5">
+          <span
+            className="font-sans tabular-nums"
+            style={{
+              fontSize: 13,
+              color: darkMode ? "rgba(240,232,210,0.75)" : "#151923",
+            }}
+          >
+            {totalSections > 0
+              ? `Section ${currentSecNum} of ${totalSections}`
+              : `${overallPct}% complete`}
+          </span>
+          {/* Progress bar */}
+          <div
+            className="w-full rounded-full overflow-hidden"
+            style={{ height: 3, background: darkMode ? "rgba(255,255,255,0.10)" : "rgba(21,25,35,0.14)" }}
+          >
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{
+                width: totalSections > 0
+                  ? `${Math.round((Math.max(0, activeSecIdx) / sectionSlugs.length) * 100)}%`
+                  : `${overallPct}%`,
+                background: "var(--nec-gold, #d6a93a)",
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Next */}
+        <div className="justify-self-end">
+          {nextChapter ? (
+            <button
+              onClick={() => goToChapter(nextChapter.slug)}
+              data-testid={`nav-next-${nextChapter.slug}`}
+              className="group text-right flex flex-col gap-0.5 items-end focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 rounded transition-opacity hover:opacity-80"
+            >
+              <span
+                className="font-sans uppercase tracking-[0.14em] block"
+                style={{ fontSize: 11, color: "#8b6b22" }}
+              >
+                Next →
+              </span>
+              <span
+                className="font-serif leading-snug hidden sm:block"
+                style={{
+                  fontSize: 14,
+                  color: darkMode ? "rgba(240,232,210,0.80)" : "#151923",
+                  maxWidth: 200,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {shortTitle(nextChapter.title)}
+              </span>
+            </button>
+          ) : (
+            <div />
+          )}
+        </div>
+      </nav>
     </div>
   );
 }

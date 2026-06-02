@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { ChevronRight, List } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { book } from "../lib/book";
 
 interface TOCProps {
@@ -49,28 +49,17 @@ export function TOC({ activeSlug, onNavigate, onChapterNavigate, onGoHome, scrol
   const toggleChapter = useCallback((chapterSlug: string, currentlyExpanded: boolean) => {
     if (currentlyExpanded) {
       setManualCollapsed((prev) => new Set([...prev, chapterSlug]));
-      setManualExpanded((prev) => {
-        const next = new Set(prev);
-        next.delete(chapterSlug);
-        return next;
-      });
+      setManualExpanded((prev) => { const n = new Set(prev); n.delete(chapterSlug); return n; });
     } else {
       setManualExpanded((prev) => new Set([...prev, chapterSlug]));
-      setManualCollapsed((prev) => {
-        const next = new Set(prev);
-        next.delete(chapterSlug);
-        return next;
-      });
+      setManualCollapsed((prev) => { const n = new Set(prev); n.delete(chapterSlug); return n; });
     }
   }, []);
 
   const scrollToSlug = useCallback(
     (slug: string) => {
       const el = document.getElementById(slug);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-        history.replaceState(null, "", `#${slug}`);
-      }
+      if (el) { el.scrollIntoView({ behavior: "smooth", block: "start" }); history.replaceState(null, "", `#${slug}`); }
       onNavigate?.(slug);
     },
     [onNavigate]
@@ -86,35 +75,23 @@ export function TOC({ activeSlug, onNavigate, onChapterNavigate, onGoHome, scrol
       className="flex flex-col h-full"
       aria-label="Table of contents"
       data-testid="toc-nav"
+      style={{ color: "#f7f0df" }}
     >
-      {/* Progress + label */}
-      <div className="shrink-0 px-4 pt-4 pb-3">
-        {/* Progress text */}
+      {/* Progress block */}
+      <div className="shrink-0 px-6 pt-6 pb-4">
         <div className="flex items-baseline justify-between mb-2">
-          <p
-            className="text-[9px] font-sans uppercase tracking-[0.22em] font-semibold"
-            style={{ color: "rgba(201,160,58,0.55)" }}
-          >
-            Contents Outline
+          <p style={{ fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: "#f7f0df", fontFamily: "var(--app-font-sans, sans-serif)", margin: 0 }}>
+            {progressPct}% Complete
           </p>
-          <span
-            className="text-[9px] font-sans tabular-nums font-medium"
-            style={{ color: "rgba(240,232,210,0.35)" }}
-          >
-            {progressPct}% complete
-          </span>
         </div>
-
-        {/* Progress bar */}
-        <div
-          className="h-[3px] rounded-full overflow-hidden"
-          style={{ background: "rgba(255,255,255,0.07)" }}
-        >
+        {/* Purple → gold gradient progress bar */}
+        <div style={{ width: "100%", height: 3, background: "rgba(255,255,255,0.12)", borderRadius: 2, overflow: "hidden" }}>
           <div
-            className="h-full rounded-full transition-all duration-700"
             style={{
+              height: 3,
               width: `${progressPct}%`,
-              background: "linear-gradient(90deg, rgba(201,160,58,0.7), rgba(201,160,58,0.3))",
+              background: "linear-gradient(90deg, #8b5cff, #d6a93a)",
+              transition: "width 0.7s ease",
             }}
             role="progressbar"
             aria-valuenow={progressPct}
@@ -124,32 +101,32 @@ export function TOC({ activeSlug, onNavigate, onChapterNavigate, onGoHome, scrol
           />
         </div>
 
-        <div className="mt-3 h-px" style={{ background: "rgba(201,160,58,0.08)" }} />
+        {/* CONTENTS OUTLINE label */}
+        <p style={{ marginTop: 28, marginBottom: 4, fontSize: 11, letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(247,240,223,0.55)", fontFamily: "var(--app-font-sans, sans-serif)" }}>
+          Contents Outline
+        </p>
+        <div style={{ height: 1, background: "rgba(214,169,58,0.12)", marginBottom: 4 }} />
       </div>
 
       {/* Chapter list */}
-      <ol className="flex-1 overflow-y-auto py-1 px-2 space-y-0" role="list">
+      <ol className="flex-1 overflow-y-auto py-1 px-3 space-y-0" role="list">
         {book.chapters.map((chapter, chIdx) => {
           const isActive = activeSlug === chapter.slug;
           const isChapterInView = activeChapterSlug === chapter.slug;
           const expanded = isExpanded(chapter.slug);
           const hasSections = chapter.sections.filter((s) => s.title).length > 0;
+          const chapterTitle = chapter.title.replace(/^Chapter \d+:\s*/, "") || chapter.title;
 
           return (
             <li key={chapter.slug} role="listitem">
               <div className="flex items-center gap-0.5">
-                {/* Expand/collapse toggle */}
                 {hasSections ? (
                   <button
                     onClick={() => toggleChapter(chapter.slug, expanded)}
                     aria-expanded={expanded}
                     aria-label={expanded ? `Collapse ${chapter.title}` : `Expand ${chapter.title}`}
                     className="shrink-0 p-1 rounded transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/20"
-                    style={{
-                      color: isChapterInView
-                        ? "rgba(240,232,210,0.55)"
-                        : "rgba(240,232,210,0.20)",
-                    }}
+                    style={{ color: isChapterInView ? "rgba(247,240,223,0.65)" : "rgba(247,240,223,0.25)" }}
                     data-testid={`toc-toggle-${chapter.slug}`}
                   >
                     <ChevronRight
@@ -161,31 +138,39 @@ export function TOC({ activeSlug, onNavigate, onChapterNavigate, onGoHome, scrol
                   <span className="w-[22px] shrink-0" />
                 )}
 
-                {/* Chapter title button */}
+                {isChapterInView && (
+                  <span
+                    className="shrink-0 text-[9px] font-sans font-bold uppercase tracking-[0.20em] mr-1 hidden xl:block"
+                    style={{ color: "rgba(214,169,58,0.60)" }}
+                  >
+                    {chIdx === 0 ? "PRO" : chIdx === book.chapters.length - 1 ? "END" : chIdx}
+                  </span>
+                )}
+
                 <button
                   ref={isActive ? (activeRef as React.RefObject<HTMLButtonElement>) : undefined}
                   onClick={() => onChapterNavigate ? onChapterNavigate(chapter.slug) : scrollToSlug(chapter.slug)}
                   data-testid={`toc-chapter-${chapter.slug}`}
                   aria-current={isActive ? "location" : undefined}
-                  className="flex-1 text-left px-2 py-[7px] rounded text-[0.72rem] font-sans leading-snug transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/25 focus-visible:outline-offset-1"
+                  className="flex-1 text-left px-2 py-[7px] rounded text-[0.73rem] font-sans leading-snug transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/25 focus-visible:outline-offset-1"
                   style={{
                     color: isActive
-                      ? "rgba(201,160,58,0.95)"
+                      ? "#d6a93a"
                       : isChapterInView
-                      ? "rgba(240,232,210,0.88)"
-                      : "rgba(240,232,210,0.42)",
+                      ? "#f7f0df"
+                      : "rgba(247,240,223,0.50)",
                     fontWeight: isActive ? 600 : isChapterInView ? 500 : 400,
                   }}
                 >
-                  {chapter.title.replace(/^Chapter \d+:\s*/, "") || chapter.title}
+                  {chapterTitle}
                 </button>
               </div>
 
               {/* Section list */}
               {expanded && hasSections && (
                 <ol
-                  className="mt-0.5 mb-1 ml-5 pl-3 space-y-0"
-                  style={{ borderLeft: "1px solid rgba(201,160,58,0.12)" }}
+                  className="mt-0.5 mb-1 ml-5 space-y-0"
+                  style={{ borderLeft: "1px solid rgba(214,169,58,0.18)", paddingLeft: 14 }}
                   role="list"
                 >
                   {chapter.sections
@@ -199,12 +184,16 @@ export function TOC({ activeSlug, onNavigate, onChapterNavigate, onGoHome, scrol
                             onClick={() => scrollToSlug(section.slug)}
                             data-testid={`toc-section-${section.slug}`}
                             aria-current={isSectionActive ? "location" : undefined}
-                            className="w-full text-left px-2 py-[5px] rounded text-[0.67rem] font-sans leading-snug transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/20 focus-visible:outline-offset-1"
+                            className="w-full text-left py-[7px] rounded text-[0.68rem] font-sans leading-snug transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/20 focus-visible:outline-offset-1"
                             style={{
                               color: isSectionActive
-                                ? "rgba(201,160,58,0.90)"
-                                : "rgba(240,232,210,0.35)",
-                              fontWeight: isSectionActive ? 500 : 400,
+                                ? "#d6a93a"
+                                : "rgba(247,240,223,0.55)",
+                              fontWeight: isSectionActive ? 600 : 400,
+                              borderLeft: isSectionActive ? "2px solid #d6a93a" : "2px solid transparent",
+                              paddingLeft: isSectionActive ? 10 : 0,
+                              marginLeft: isSectionActive ? -2 : 0,
+                              transition: "all 0.15s ease",
                             }}
                           >
                             {section.title}
@@ -219,18 +208,20 @@ export function TOC({ activeSlug, onNavigate, onChapterNavigate, onGoHome, scrol
         })}
       </ol>
 
-      {/* View full contents link */}
+      {/* View Full Contents button */}
       {onGoHome && (
-        <div
-          className="shrink-0 px-4 py-3"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
-        >
+        <div className="shrink-0 px-4 py-4" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
           <button
             onClick={onGoHome}
-            className="w-full flex items-center gap-2 text-[10px] font-sans uppercase tracking-[0.18em] font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/25 rounded"
-            style={{ color: "rgba(201,160,58,0.45)" }}
+            className="w-full flex items-center justify-center gap-2 font-sans uppercase tracking-[0.14em] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/25 rounded"
+            style={{
+              fontSize: 11,
+              height: 44,
+              border: "1px solid rgba(214,169,58,0.28)",
+              background: "rgba(255,255,255,0.03)",
+              color: "#f7f0df",
+            }}
           >
-            <List size={11} />
             View Full Contents
           </button>
         </div>
