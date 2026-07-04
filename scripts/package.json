@@ -6,10 +6,14 @@
   "scripts": {
     "hello": "tsx ./src/hello.ts",
     "parse-book": "node ./src/parseLatexBook.mjs",
+    "parse-book-docx": "node ./src/parseDocxBook.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
     "@types/node": "catalog:",
     "tsx": "catalog:"
+  },
+  "dependencies": {
+    "mammoth": "^1.12.0"
   }
 }
