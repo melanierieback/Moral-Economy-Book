@@ -249,13 +249,16 @@
   }
 
   html {
-    overflow-x: hidden;
+    /* `clip` (not `hidden`) — overflow-x: hidden turns body into a scroll
+       container and silently breaks every position: sticky descendant
+       (the reader's top bar stopped sticking). clip clips without scrolling. */
+    overflow-x: clip;
   }
 
   body {
     @apply antialiased bg-background text-foreground;
     font-family: var(--app-font-sans);
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 }
 

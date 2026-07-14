@@ -142,7 +142,7 @@ export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProp
               <div className="w-px h-4 mx-1" style={{ background: "rgba(255,255,255,0.08)" }} />
               <button
                 className="px-4 py-2 text-[13px] font-sans transition-colors rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30"
-                style={{ color: "rgba(247,240,223,0.52)" }}
+                style={{ color: "rgba(247,240,223,0.80)" }}
               >
                 About
               </button>
@@ -152,7 +152,7 @@ export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProp
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 px-4 py-2 text-[13px] font-sans transition-colors rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30"
-                style={{ color: "rgba(247,240,223,0.52)" }}
+                style={{ color: "rgba(247,240,223,0.80)" }}
               >
                 NEC Home
                 <ExternalLink size={10} />
@@ -167,7 +167,7 @@ export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProp
               <button
                 onClick={onToggleDark}
                 aria-label={darkMode ? "Switch to light reading mode" : "Switch to dark reading mode"}
-                className="text-white/35 hover:text-white/65 transition-colors p-2 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30"
+                className="text-white/70 hover:text-white/90 transition-colors p-2 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30"
               >
                 {darkMode ? <Sun size={15} /> : <Moon size={15} />}
               </button>
@@ -238,7 +238,7 @@ export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProp
 
                 <p
                   className="font-sans leading-relaxed mb-10 max-w-[500px]"
-                  style={{ fontSize: "1.0rem", color: "rgba(235,228,210,0.60)" }}
+                  style={{ fontSize: "1.0rem", color: "rgba(235,228,210,0.76)" }}
                 >
                   A reader on ownership, finance, stewardship, and the recovery of an economy ordered toward life.
                 </p>
@@ -305,7 +305,7 @@ export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProp
             onClick={scrollToTOC}
             aria-label="Scroll to Table of Contents"
             className="flex flex-col items-center gap-2 transition-opacity hover:opacity-75 focus-visible:outline-none"
-            style={{ color: "rgba(214,169,58,0.40)" }}
+            style={{ color: "rgba(214,169,58,0.68)" }}
           >
             <span className="font-sans text-[10px] tracking-[0.28em] uppercase">Contents</span>
             <ArrowDown size={13} className="animate-bounce" />
@@ -333,7 +333,7 @@ export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProp
             <button
               onClick={() => setExpandAll((e) => !e)}
               className="font-sans text-[11px] flex items-center gap-1 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/25 rounded px-1"
-              style={{ color: "rgba(214,169,58,0.55)" }}
+              style={{ color: "rgba(214,169,58,0.78)" }}
             >
               {expandAll ? "Collapse all ↑" : "Expand all ↓"}
             </button>
@@ -382,13 +382,13 @@ export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProp
                       >
                         <span
                           className="text-[9px] font-sans uppercase tracking-[0.24em] font-semibold"
-                          style={{ color: "rgba(214,169,58,0.58)" }}
+                          style={{ color: "rgba(214,169,58,0.78)" }}
                         >
                           {label}
                         </span>
                         <span
                           className="font-serif text-[0.95rem] leading-snug group-hover:text-white transition-colors"
-                          style={{ color: "rgba(245,238,218,0.88)" }}
+                          style={{ color: "rgba(245,238,218,0.94)" }}
                         >
                           {shortTitle}
                         </span>
@@ -398,7 +398,7 @@ export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProp
                       {sections.length > 0 && (
                         <span
                           className="shrink-0 font-sans text-[10px] hidden sm:block tabular-nums"
-                          style={{ color: "rgba(255,255,255,0.25)" }}
+                          style={{ color: "rgba(255,255,255,0.58)" }}
                         >
                           {sections.length} sections
                         </span>
@@ -409,7 +409,7 @@ export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProp
                         onClick={() => sections.length > 0 ? toggleExpand(chapter.slug) : onOpenReading(chapter.slug)}
                         aria-expanded={sections.length > 0 ? isExpanded : undefined}
                         className="shrink-0 p-2 rounded transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/20"
-                        style={{ color: "rgba(214,169,58,0.45)" }}
+                        style={{ color: "rgba(214,169,58,0.70)" }}
                         aria-label={
                           sections.length > 0
                             ? isExpanded ? "Collapse" : "Expand sections"
@@ -436,13 +436,13 @@ export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProp
                                 onClick={() => onOpenReading(chapter.slug, section.slug)}
                                 data-testid={`home-section-${section.slug}`}
                                 className="w-full text-left px-2 py-[6px] text-[0.78rem] font-sans rounded transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/15 flex items-center gap-2 group"
-                                style={{ color: "rgba(226,210,180,0.45)" }}
+                                style={{ color: "rgba(226,210,180,0.72)" }}
                               >
                                 <span
                                   className="w-[3px] h-[3px] rounded-full shrink-0"
-                                  style={{ background: "rgba(214,169,58,0.40)" }}
+                                  style={{ background: "rgba(214,169,58,0.65)" }}
                                 />
-                                <span className="flex-1 leading-snug group-hover:text-white/70 transition-colors">
+                                <span className="flex-1 leading-snug group-hover:text-white/90 transition-colors">
                                   {section.title}
                                 </span>
                               </button>
@@ -462,7 +462,7 @@ export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProp
             <button
               onClick={() => onOpenReading(book.chapters[book.chapters.length - 2]?.slug ?? book.chapters[0].slug)}
               className="flex items-center gap-1.5 font-sans text-[12px] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/25 rounded"
-              style={{ color: "rgba(214,169,58,0.50)" }}
+              style={{ color: "rgba(214,169,58,0.78)" }}
             >
               Continue through all {book.chapters.length - 2} chapters and Conclusion
               <ArrowRight size={12} />
@@ -478,7 +478,7 @@ export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProp
       >
         <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-4">
           <NecLogo size="sm" />
-          <p className="font-sans text-xs" style={{ color: "rgba(220,210,188,0.22)" }}>
+          <p className="font-sans text-xs" style={{ color: "rgba(220,210,188,0.62)" }}>
             <span className="font-serif italic">{book.title}</span> — Working manuscript
           </p>
         </div>

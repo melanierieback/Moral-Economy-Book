@@ -14,7 +14,7 @@ interface ReaderProps {
   onToggleDark: () => void;
 }
 
-const HEADER_H = 64;
+const HEADER_H = 76;
 const BOTTOM_NAV_H = 82;
 const SIDEBAR_W = 300;
 
@@ -222,7 +222,7 @@ export function Reader({ initialChapterSlug, initialSectionSlug, onGoHome, darkM
               className="p-2 rounded transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30"
               aria-label={darkMode ? "Light mode" : "Dark mode"}
               data-testid="button-toggle-dark"
-              style={{ color: "rgba(240,232,210,0.45)" }}
+              style={{ color: "rgba(240,232,210,0.78)" }}
             >
               {darkMode ? <Sun size={15} /> : <Moon size={15} />}
             </button>
@@ -242,7 +242,7 @@ export function Reader({ initialChapterSlug, initialSectionSlug, onGoHome, darkM
               className="lg:hidden p-2 rounded transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30"
               data-testid="button-open-toc"
               aria-label="Open chapter outline"
-              style={{ color: "rgba(240,232,210,0.55)" }}
+              style={{ color: "rgba(240,232,210,0.82)" }}
             >
               <Menu size={18} />
             </button>
@@ -278,7 +278,7 @@ export function Reader({ initialChapterSlug, initialSectionSlug, onGoHome, darkM
                 onClick={() => setMobileOpen(false)}
                 className="p-1 rounded transition-colors"
                 aria-label="Close"
-                style={{ color: "rgba(240,232,210,0.40)" }}
+                style={{ color: "rgba(240,232,210,0.72)" }}
               >
                 <X size={18} />
               </button>
@@ -327,7 +327,9 @@ export function Reader({ initialChapterSlug, initialSectionSlug, onGoHome, darkM
       <main
         id="main-content"
         style={{
-          marginLeft: 0,
+          /* NB: margin-left must stay OUT of this inline style — an inline
+             `marginLeft: 0` overrides the lg:ml-[300px] class and lets the
+             fixed sidebar overlap the text at 1024–1360px widths. */
           paddingBottom: BOTTOM_NAV_H + 48,
           background: readingBg,
           color: readingColor,
@@ -370,9 +372,10 @@ export function Reader({ initialChapterSlug, initialSectionSlug, onGoHome, darkM
           gridTemplateColumns: "1fr minmax(200px, 320px) 1fr",
           alignItems: "center",
           gap: 16,
-          padding: "0 24px",
+          /* horizontal padding lives in the classes below — inline padding
+             would override the lg: variants (same trap as the sidebar margin) */
         }}
-        className="lg:pl-[324px] lg:pr-12"
+        className="px-6 lg:pl-[324px] lg:pr-12"
       >
         {/* Previous */}
         <div className="justify-self-start">
@@ -384,7 +387,7 @@ export function Reader({ initialChapterSlug, initialSectionSlug, onGoHome, darkM
             >
               <span
                 className="font-sans uppercase tracking-[0.14em] block"
-                style={{ fontSize: 11, color: "#8b6b22" }}
+                style={{ fontSize: 11, color: darkMode ? "#d3a94c" : "#8b6b22" }}
               >
                 ← Previous
               </span>
@@ -392,7 +395,7 @@ export function Reader({ initialChapterSlug, initialSectionSlug, onGoHome, darkM
                 className="font-serif leading-snug hidden sm:block"
                 style={{
                   fontSize: 14,
-                  color: darkMode ? "rgba(240,232,210,0.80)" : "#151923",
+                  color: darkMode ? "rgba(240,232,210,0.92)" : "#151923",
                   maxWidth: 200,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
@@ -413,7 +416,7 @@ export function Reader({ initialChapterSlug, initialSectionSlug, onGoHome, darkM
             className="font-sans tabular-nums"
             style={{
               fontSize: 13,
-              color: darkMode ? "rgba(240,232,210,0.75)" : "#151923",
+              color: darkMode ? "rgba(240,232,210,0.88)" : "#151923",
             }}
           >
             {totalSections > 0
@@ -447,7 +450,7 @@ export function Reader({ initialChapterSlug, initialSectionSlug, onGoHome, darkM
             >
               <span
                 className="font-sans uppercase tracking-[0.14em] block"
-                style={{ fontSize: 11, color: "#8b6b22" }}
+                style={{ fontSize: 11, color: darkMode ? "#d3a94c" : "#8b6b22" }}
               >
                 Next →
               </span>
@@ -455,7 +458,7 @@ export function Reader({ initialChapterSlug, initialSectionSlug, onGoHome, darkM
                 className="font-serif leading-snug hidden sm:block"
                 style={{
                   fontSize: 14,
-                  color: darkMode ? "rgba(240,232,210,0.80)" : "#151923",
+                  color: darkMode ? "rgba(240,232,210,0.92)" : "#151923",
                   maxWidth: 200,
                   overflow: "hidden",
                   textOverflow: "ellipsis",

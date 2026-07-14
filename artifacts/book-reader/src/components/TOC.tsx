@@ -102,7 +102,7 @@ export function TOC({ activeSlug, onNavigate, onChapterNavigate, onGoHome, scrol
         </div>
 
         {/* CONTENTS OUTLINE label */}
-        <p style={{ marginTop: 28, marginBottom: 4, fontSize: 11, letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(247,240,223,0.55)", fontFamily: "var(--app-font-sans, sans-serif)" }}>
+        <p style={{ marginTop: 28, marginBottom: 4, fontSize: 11, letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(247,240,223,0.72)", fontFamily: "var(--app-font-sans, sans-serif)" }}>
           Contents Outline
         </p>
         <div style={{ height: 1, background: "rgba(214,169,58,0.12)", marginBottom: 4 }} />
@@ -126,7 +126,7 @@ export function TOC({ activeSlug, onNavigate, onChapterNavigate, onGoHome, scrol
                     aria-expanded={expanded}
                     aria-label={expanded ? `Collapse ${chapter.title}` : `Expand ${chapter.title}`}
                     className="shrink-0 p-1 rounded transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/20"
-                    style={{ color: isChapterInView ? "rgba(247,240,223,0.65)" : "rgba(247,240,223,0.25)" }}
+                    style={{ color: isChapterInView ? "rgba(247,240,223,0.85)" : "rgba(247,240,223,0.50)" }}
                     data-testid={`toc-toggle-${chapter.slug}`}
                   >
                     <ChevronRight
@@ -141,7 +141,7 @@ export function TOC({ activeSlug, onNavigate, onChapterNavigate, onGoHome, scrol
                 {isChapterInView && (
                   <span
                     className="shrink-0 text-[9px] font-sans font-bold uppercase tracking-[0.20em] mr-1 hidden xl:block"
-                    style={{ color: "rgba(214,169,58,0.60)" }}
+                    style={{ color: "rgba(214,169,58,0.80)" }}
                   >
                     {chIdx === 0 ? "PRO" : chIdx === book.chapters.length - 1 ? "END" : chIdx}
                   </span>
@@ -158,7 +158,7 @@ export function TOC({ activeSlug, onNavigate, onChapterNavigate, onGoHome, scrol
                       ? "#d6a93a"
                       : isChapterInView
                       ? "#f7f0df"
-                      : "rgba(247,240,223,0.50)",
+                      : "rgba(247,240,223,0.78)",
                     fontWeight: isActive ? 600 : isChapterInView ? 500 : 400,
                   }}
                 >
@@ -188,7 +188,7 @@ export function TOC({ activeSlug, onNavigate, onChapterNavigate, onGoHome, scrol
                             style={{
                               color: isSectionActive
                                 ? "#d6a93a"
-                                : "rgba(247,240,223,0.55)",
+                                : "rgba(247,240,223,0.78)",
                               fontWeight: isSectionActive ? 600 : 400,
                               borderLeft: isSectionActive ? "2px solid #d6a93a" : "2px solid transparent",
                               paddingLeft: isSectionActive ? 10 : 0,
