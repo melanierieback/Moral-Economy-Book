@@ -148,7 +148,7 @@ export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProp
               </button>
               <div className="w-px h-4 mx-1" style={{ background: "rgba(255,255,255,0.07)" }} />
               <a
-                href="https://non-extractive.capital"
+                href="https://melanierieback.github.io/NEC-Home-Small/index.html"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 px-4 py-2 text-[13px] font-sans transition-colors rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/30"
