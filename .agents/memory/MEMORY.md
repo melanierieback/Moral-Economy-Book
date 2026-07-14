@@ -1,1 +1,0 @@
-- [NEC Book Reader Design System](nec-book-reader-design.md) — visual identity: dark purple hero, starburst SVG motif, gold accents, NecLogo component.
