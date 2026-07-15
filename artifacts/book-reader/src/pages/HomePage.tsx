@@ -3,7 +3,7 @@ import { ChevronRight, ArrowRight, ArrowDown, Sun, Moon, ExternalLink } from "lu
 import { book } from "../lib/book";
 import { NecLogo } from "../components/NecLogo";
 import { Search } from "../components/Search";
-import coverImg from "@assets/capital-that-serves-life-cover_1780352193918.png";
+import coverImg from "@assets/moral-economy-cover.png";
 import cosmicBg from "@assets/cosmic-grid-purple-background_1780352193918.png";
 
 interface HomePageProps {
