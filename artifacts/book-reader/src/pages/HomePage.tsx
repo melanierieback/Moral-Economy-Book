@@ -186,7 +186,7 @@ export function HomePage({ onOpenReading, darkMode, onToggleDark }: HomePageProp
               >
                 <img
                   src={coverImg}
-                  alt="Capital That Serves Life book cover"
+                  alt="Moral Economy book cover"
                   className="w-full h-auto rounded-lg"
                   style={{
                     border: "1px solid rgba(214,169,58,0.32)",
